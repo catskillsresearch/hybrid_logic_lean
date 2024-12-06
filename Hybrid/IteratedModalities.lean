@@ -1,10 +1,5 @@
 import Mathlib
-import Hybrid.Util
-import Hybrid.Basics
-import Hybrid.Substitution
-import Hybrid.NominalSubstitution
-open Substitution
-open NominalSubstitution
+import Hybrid.Form
 
 -- Axiom utils. Since we won't be assuming a transitive frame,
 -- it will make sense to be able to construct formulas with
@@ -31,8 +26,6 @@ theorem iter_nec_compose : iterate_nec (m + 1) φ = iterate_nec m (iterate_nec 1
 
 theorem iter_nec_succ : iterate_nec (m + 1) φ = iterate_nec m (□ φ) := by
   rw [iter_nec_one, iter_nec_compose]
-
-
 
 def iterate_pos (n : Nat) (φ : Form N) : Form N :=
   let rec loop : Nat → Form N → Form N

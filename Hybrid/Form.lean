@@ -66,10 +66,15 @@ def Form.new_var  : Form N → SVAR
 | .bind x ψ => max (x+1) (ψ.new_var)
 | _         => ⟨0⟩
 
-
 def Form.new_nom  : Form TotalSet → NOM TotalSet
 | .nom  i   => i+1
 | .impl ψ χ => max (ψ.new_nom) (χ.new_nom)
 | .box  ψ   => ψ.new_nom
 | .bind _ ψ => ψ.new_nom
 | _         => ⟨0, trivial⟩
+
+theorem ex_depth {x : SVAR} : Form.depth φ < Form.depth (ex x, φ) := by
+  simp [Form.depth]
+  rw [←Nat.add_assoc, ←Nat.add_assoc, Nat.add_comm]
+  apply Nat.lt_add_of_pos_right
+  simp
