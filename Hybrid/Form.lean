@@ -4,8 +4,6 @@ import Hybrid.PROP
 import Hybrid.SVAR
 import Hybrid.NOM
 
-open Classical
-
 inductive Form (N : Set ℕ) where
   -- atomic formulas:
   | bttm : Form N
