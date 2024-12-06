@@ -37,7 +37,9 @@ instance : IsTrans (NOM S) GE.ge where
 
 instance : IsTotal (NOM S) GE.ge where
   total := λ a => λ b =>
-    sorry
+    match Nat.le_total a.letter b.letter with
+    | Or.inl h => Or.inr h
+    | Or.inr h => Or.inl h
 
 theorem NOM.gt_iff_ge_and_ne {a b : (NOM S)} : a > b ↔ (a ≥ b ∧ a ≠ b) := by
   simp only [GT.gt, GE.ge, NOM.lt, NOM.le, LE.le, LT.lt, NOM.mk, ne_eq, NOM_eq']
