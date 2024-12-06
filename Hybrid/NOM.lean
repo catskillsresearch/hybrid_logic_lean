@@ -1,6 +1,5 @@
 import Mathlib
 import Hybrid.TotalSet
-open Classical
 
 structure NOM (N : Set ℕ) where
   letter : N

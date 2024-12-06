@@ -1,69 +1,77 @@
 import Mathlib
-import Hybrid.Util
-import Hybrid.Basics
-import Hybrid.Substitution
-import Hybrid.NominalSubstitution
-open Substitution
-open NominalSubstitution
+import Hybrid.TotalSet
+import Hybrid.PROP
+import Hybrid.SVAR
+import Hybrid.NOM
 
-section IteratedModalities
+open Classical
 
-  -- Axiom utils. Since we won't be assuming a transitive frame,
-  -- it will make sense to be able to construct formulas with
-  -- iterated modal operators at their beginning (ex., for axiom nom)
-  def iterate_nec (n : Nat) (φ : Form N) : Form N :=
-    let rec loop : Nat → Form  N → Form N
-      | 0, φ   => φ
-      | n+1, φ => □ (loop n φ)
-    loop n φ
+inductive Form (N : Set ℕ) where
+  -- atomic formulas:
+  | bttm : Form N
+  | prop : PROP   → Form N
+  | svar : SVAR   → Form N
+  | nom  :  NOM N → Form N
+  -- connectives:
+  | impl : Form N → Form N → Form N
+  -- modal:
+  | box  : Form N → Form N
+  -- hybrid:
+  | bind :   SVAR → Form N → Form N
+deriving DecidableEq, Repr
 
-  theorem iter_nec_one : □ φ = iterate_nec 1 φ := by
-    rw [iterate_nec, iterate_nec.loop, iterate_nec.loop]
+def Form.depth : Form N → ℕ
+  | .impl φ ψ =>  1 + Form.depth φ + Form.depth ψ
+  | .box  φ   =>  1 + Form.depth φ
+  | .bind _ φ =>  2 + Form.depth φ
+  | _       =>    0
 
-  theorem iter_nec_one_m_comm : iterate_nec 1 (iterate_nec m φ) = iterate_nec m (iterate_nec 1 φ) := by
-    induction m with
-    | zero =>
-        simp [iterate_nec, iterate_nec.loop]
-    | succ n ih =>
-        simp [iterate_nec, iterate_nec.loop]
-        exact ih
+instance : Nonempty (Form N) := ⟨Form.bttm⟩
 
-  theorem iter_nec_compose : iterate_nec (m + 1) φ = iterate_nec m (iterate_nec 1 φ) := by
-    rw [iterate_nec, iterate_nec.loop, iter_nec_one, ←iterate_nec, iter_nec_one_m_comm]
+@[simp]
+def Form.neg      : Form N → Form N := λ φ => Form.impl φ Form.bttm
+@[simp]
+def Form.conj     : Form N → Form N → Form N := λ φ => λ ψ => Form.neg (Form.impl φ (Form.neg ψ))
+@[simp]
+def Form.iff      : Form N → Form N → Form N := λ φ => λ ψ => Form.conj (Form.impl φ ψ) (Form.impl ψ φ)
+@[simp]
+def Form.disj     : Form N → Form N → Form N := λ φ => λ ψ => Form.impl (Form.neg φ) ψ
+@[simp]
+def Form.diamond  : Form N → Form N := λ φ => Form.neg (Form.box (Form.neg φ))
+@[simp,match_pattern]
+def Form.bind_dual: SVAR → Form N → Form N := λ x => λ φ => Form.neg (Form.bind x (Form.neg φ))
 
-  theorem iter_nec_succ : iterate_nec (m + 1) φ = iterate_nec m (□ φ) := by
-    rw [iter_nec_one, iter_nec_compose]
+instance : Coe PROP     (Form N)  := ⟨Form.prop⟩
+instance : Coe SVAR     (Form N)  := ⟨Form.svar⟩
+instance : Coe (NOM N)  (Form N)  := ⟨Form.nom⟩
+
+infixr:60 "⟶" => Form.impl
+infixl:65 "⋀" => Form.conj
+infixl:65 "⋁" => Form.disj
+prefix:100 "□" => Form.box
+prefix:100 "◇ " => Form.diamond
+notation:120 "all " x ", " φ => Form.bind x φ
+notation:120 "ex " x ", " φ => Form.bind_dual x φ
+prefix:170 "∼" => Form.neg
+infixr:60 "⟷" => Form.iff
+notation "⊥"  => Form.bttm
+
+def conjunction (Γ : Set (Form N)) (L : List Γ) : Form N :=
+match L with
+  | []     => ⊥ ⟶ ⊥
+  | h :: t => h.val ⋀ conjunction Γ t
+
+def Form.new_var  : Form N → SVAR
+| .svar x   => x+1
+| .impl ψ χ => max (ψ.new_var) (χ.new_var)
+| .box  ψ   => ψ.new_var
+| .bind x ψ => max (x+1) (ψ.new_var)
+| _         => ⟨0⟩
 
 
-
-  def iterate_pos (n : Nat) (φ : Form N) : Form N :=
-    let rec loop : Nat → Form N → Form N
-      | 0, φ   => φ
-      | n+1, φ => ◇ (loop n φ)
-    loop n φ
-
-  theorem iter_pos_one : ◇ φ = iterate_pos 1 φ := by
-    rw [iterate_pos, iterate_pos.loop, iterate_pos.loop]
-
-  theorem iter_pos_one_m_comm : iterate_pos 1 (iterate_pos m φ) = iterate_pos m (iterate_pos 1 φ) := by
-    induction m with
-    | zero =>
-        simp [iterate_pos, iterate_pos.loop]
-    | succ n ih =>
-        simp [iterate_pos, iterate_pos.loop]
-        exact ih
-
-  theorem iter_pos_compose : iterate_pos (m + 1) φ = iterate_pos m (iterate_pos 1 φ) := by
-    rw [iterate_pos, iterate_pos.loop, iter_pos_one, ←iterate_pos, iter_pos_one_m_comm]
-
-  theorem iter_pos_succ : iterate_pos (m + 1) φ = iterate_pos m (◇ φ) := by
-    rw [iter_pos_one, iter_pos_compose]
-
-
-end IteratedModalities
-
-  theorem ex_depth {x : SVAR} : Form.depth φ < Form.depth (ex x, φ) := by
-    simp [Form.depth]
-    rw [←Nat.add_assoc, ←Nat.add_assoc, Nat.add_comm]
-    apply Nat.lt_add_of_pos_right
-    simp
+def Form.new_nom  : Form TotalSet → NOM TotalSet
+| .nom  i   => i+1
+| .impl ψ χ => max (ψ.new_nom) (χ.new_nom)
+| .box  ψ   => ψ.new_nom
+| .bind _ ψ => ψ.new_nom
+| _         => ⟨0, trivial⟩
