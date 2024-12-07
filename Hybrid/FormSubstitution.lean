@@ -1,6 +1,5 @@
 import Mathlib
 import Hybrid.Util
-import Hybrid.Basics
 
 def occurs (x : SVAR) (φ : Form N) : Bool :=
   match φ with

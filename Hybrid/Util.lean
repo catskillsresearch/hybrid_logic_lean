@@ -1,7 +1,6 @@
 import Mathlib
 import Hybrid.TypeIff
 open Classical
-open TypeIff
 
 noncomputable def choice_intro (q : α → Sort u) (p : α → Prop) (P : ∃ a, p a) : (∀ a, p a → q a) → q P.choose := by
   intro h

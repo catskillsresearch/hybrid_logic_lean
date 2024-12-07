@@ -1,6 +1,4 @@
-import Mathlib.Data.Countable.Basic
-import Mathlib.Logic.Equiv.List
-import Mathlib.Data.Nat.Pow
+import Mathlib
 import Hybrid.Form
 
 def pow2list (l : List (ℕ × ℕ × ℕ × ℕ)) := List.map (λ (a,b,c,d) => (2^(a+1), 2^(b+1), 2^(c+1), 2^(d+1))) l
