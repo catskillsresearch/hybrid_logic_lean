@@ -1,6 +1,7 @@
 import Hybrid.ProofUtils
 import Hybrid.Truth
 import Hybrid.Soundness
+import Hybrid.Util
 -- Interface for proofs to be filled
 -- about renaming bound vars:
 import Hybrid.RenameBound

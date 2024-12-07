@@ -9,12 +9,12 @@ section Lemmas
       conv => rhs; intro M; rhs; intro s; rhs; intro g; intro φ; rw [disj_comm]
       exact h
     }
-  
+
   theorem unsatisfiable_iff_contradiction (Γ : Set (Form N)) : ¬satisfiable Γ ↔ Γ ⊨ ⊥ := by
     conv => rhs; rw [←@not_not (Γ ⊨ ⊥)]
     apply Iff.not
     apply satisfiable_iff_nocontradiction
-  
+
   theorem notsatnot {Γ : Set (Form N)} {φ : Form N} : (Γ⊨φ) ↔ ¬satisfiable (Γ ∪ {∼φ}) := by
     rw [unsatisfiable_iff_contradiction, ←SemanticDeduction, ←Form.neg, Entails, Entails]
     conv => rhs; intro M s g h; rw [neg_sat, neg_sat, not_not]
@@ -64,4 +64,4 @@ theorem Completeness : (∀ (Γ : Set (Form N)) (φ : Form N), Γ ⊨ φ → Γ 
   revert h1 h2 h3
   rw [←completeness_statement, ModelExistence]
   unfold cons_sat_statement
-  admit
+  sorry

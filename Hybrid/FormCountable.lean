@@ -1,5 +1,5 @@
-import Mathlib
 import Hybrid.Form
+import Hybrid.Util
 
 def pow2list (l : List (ℕ × ℕ × ℕ × ℕ)) := List.map (λ (a,b,c,d) => (2^(a+1), 2^(b+1), 2^(c+1), 2^(d+1))) l
 
@@ -81,7 +81,7 @@ lemma split_prefix_suffix {a b : List (ℕ × ℕ × ℕ × ℕ)} (hyp : a.isPre
               simp
               exact ⟨⟨h1.symm, hsum⟩, is_suffix_cons hb hsuf⟩
 
-theorem prime_2_3 (n m : Nat) : 3^(n+1) ≠ 2^(m+1) := by admit
+theorem prime_2_3 (n m : Nat) : 3^(n+1) ≠ 2^(m+1) := by sorry
 
 lemma pow2listinj : pow2list.Injective := by
   intro l1 l2 hyp
@@ -130,10 +130,10 @@ theorem pow3listinj : pow3list.Injective := by
           . exact ih hyp.right
 
 lemma guns : x ∈ pow2list a → ∃ n, x.fst = 2^(n+1) := by
-  admit
+  sorry
 
 lemma of_brixton {a : List (ℕ × ℕ × ℕ × ℕ)} : (h :: t).isSuffixOf a → h ∈ a := by
-  admit
+  sorry
 
 lemma suffix_pow2 {a : List (ℕ × ℕ × ℕ × ℕ)} : (h :: t).isSuffixOf (pow2list a) → ∃ n, h.fst = 2^(n+1) := by
   intro hyp

@@ -1,6 +1,7 @@
 import Hybrid.Substitutions
 import Hybrid.Proof
 import Hybrid.ListUtils
+import Hybrid.Util
 
 namespace Proof
 
@@ -832,7 +833,7 @@ end MCS
 
 theorem iff_subst : ⊢ ((φ ⟷ ψ) ⟶ (ψ ⟷ χ) ⟶ (φ ⟷ χ)) := by
   apply tautology
-  admit
+  sorry
 
 theorem pf_iff_subst : ⊢ (φ ⟷ ψ) → ⊢ (ψ ⟷ χ) → ⊢ (φ ⟷ χ) := by
   intro h1 h2

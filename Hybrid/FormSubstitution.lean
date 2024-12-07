@@ -1,4 +1,4 @@
-import Mathlib
+import Hybrid.Form
 import Hybrid.Util
 
 def occurs (x : SVAR) (φ : Form N) : Bool :=

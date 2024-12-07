@@ -322,12 +322,12 @@ lemma LindenbaumWitnessed {Γ : Set (Form N)} (c : consistent Γ) {f : Form N �
             intro not₁
             have : e (Nat.zero) = ((all x, ψ⟶⊥)⟶⊥) := by rw [not₁, e_inv, Function.leftInverse_invFun f_inj]
             rw [lindenbaum_family, this, lindenbaum_next]
-            admit
+            sorry
         | succ n =>
             intro not₁
             simp [lindenbaum_family]
-            admit
+            sorry
 
     . assumption
 
-theorem ExtendedLindenbaumLemma : ∀ Γ : Set (Form TotalSet), consistent Γ → ∃ Γ' : Set (Form TotalSet), Γ.odd_noms ⊆ Γ' ∧ MCS Γ' ∧ witnessed Γ' := by admit
+theorem ExtendedLindenbaumLemma : ∀ Γ : Set (Form TotalSet), consistent Γ → ∃ Γ' : Set (Form TotalSet), Γ.odd_noms ⊆ Γ' ∧ MCS Γ' ∧ witnessed Γ' := by sorry

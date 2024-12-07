@@ -46,7 +46,7 @@ lemma l313' {Δ : Set (Form N)} (mcs : MCS Δ) (wit : witnessed Δ) (mem : ◇φ
       have mem' := MCS_pf mcs (Γ_mp this (Γ_premise mem))
       have has_wit := wit mem'
       simp [subst_nom, y_ne_x] at has_wit ⊢
-      admit
+      sorry
   . trivial
 
 -- ◇ (((ex x, ψ)⟶ψ[y//x])⋀φ)
@@ -84,7 +84,7 @@ theorem set_family (enum : ℕ → Form N) {Δ : Set (Form N)} (mcs : Δ.MCS) (w
   (n : ℕ) → (∃ Γ : Set (Form N), Canonical.R Δ Γ ∧ φ ∈ Γ ∧ ∀ i : ℕ, i < n → Γ.has_wit_of (enum i))
   | 0     => by
       let Γ₀ := {φ} ∪ {ψ | □ψ ∈ Δ}
-      have : Γ₀.consistent := by admit
+      have : Γ₀.consistent := by sorry
       have ⟨Γ₀', incl, l_mcs⟩ := RegularLindenbaumLemma Γ₀ this
       exists Γ₀'
       apply And.intro
@@ -95,7 +95,7 @@ theorem set_family (enum : ℕ → Form N) {Δ : Set (Form N)} (mcs : Δ.MCS) (w
       . simp; apply incl; simp
   | n+1   => by
       have ⟨Γ_ih, ⟨R_ih, ⟨mem_ih, wit_ih⟩⟩⟩ := set_family enum mcs wit mem n
-      admit
+      sorry
 
 def succesor_set (enum : ℕ → Form N) {Δ : Set (Form N)} (mcs : Δ.MCS) (wit : Δ.witnessed) (mem : ◇φ ∈ Δ) : Set (Form N) :=
   {φ | ∃ n : ℕ, φ ∈ (set_family enum mcs wit mem n).choose}

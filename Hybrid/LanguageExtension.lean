@@ -1,5 +1,6 @@
 import Hybrid.Proof
 import Hybrid.Substitutions
+import Hybrid.Util
 
 open Proof
 
@@ -77,7 +78,7 @@ theorem total_bind {φ : Form N} : φ⁺ = (all x, ψ) → φ = (all x, ψ⁻) :
 theorem total_subst_svar {φ : Form N} {x y : SVAR} : φ⁺ = ψ[y//x] → φ = ψ⁻[y//x] := by
   intro h
 
-  admit
+  sorry
 
 theorem total_ax_k {φ : Form N} (h : φ⁺ = □(ψ ⟶ χ) ⟶ (□ψ ⟶ □χ)) : φ = □(ψ⁻ ⟶ χ⁻) ⟶ (□ψ⁻ ⟶ □χ⁻) := by
   cases φ with
@@ -142,19 +143,19 @@ theorem total_ax_q2_svar {φ : Form N} {x y : SVAR} (h : φ⁺ = (all x, ψ) ⟶
 
 
 lemma total_tautology {φ : Form N} : Tautology φ ↔ Tautology φ.total := by
-  admit
+  sorry
 
 lemma total_subst_svar' {φ : Form N} {x y : SVAR} : (φ[y // x]).total = (φ.total)[y // x] := by
-  admit
+  sorry
 
 lemma total_subst_nom {φ : Form N} {i : NOM N} {x : SVAR} : (φ[i // x]).total = (φ.total)[⟨i.1.1, trivial⟩ // x] := by
-  admit
+  sorry
 
 lemma total_iterate_pos {φ : Form N} : (iterate_pos n φ).total = iterate_pos n (φ.total) := by
-  admit
+  sorry
 
 lemma total_iterate_nec {φ : Form N} : (iterate_nec n φ).total = iterate_nec n (φ.total) := by
-  admit
+  sorry
 
 lemma l416 {φ : Form N} {x : SVAR} (i : NOM N) (pf : ⊢ φ) (h : pf.fresh_var x) : ⊢ (φ[x // i]) := by
   induction pf with
@@ -172,8 +173,8 @@ lemma l416 {φ : Form N} {x : SVAR} (i : NOM N) (pf : ⊢ φ) (h : pf.fresh_var 
       apply ax_brcn
   | ax_q2_svar =>
       simp [fresh_var] at h
-      admit
-  | _ => admit
+      sorry
+  | _ => sorry
 
 theorem pf_extended {φ : Form N} : ⊢ φ iff ⊢ φ.total := by
   apply TypeIff.intro
@@ -187,11 +188,11 @@ theorem pf_extended {φ : Form N} : ⊢ φ iff ⊢ φ.total := by
         apply Proof.ax_k
     | ax_q1 =>
         apply Proof.ax_q1
-        admit
+        sorry
     | ax_q2_svar =>
         simp [Form.total, total_subst_svar']
         apply Proof.ax_q2_svar
-        admit
+        sorry
     | ax_q2_nom =>
         simp [Form.total, total_subst_nom]
         apply Proof.ax_q2_nom
@@ -224,25 +225,25 @@ theorem pf_extended {φ : Form N} : ⊢ φ iff ⊢ φ.total := by
     | ax_q1 =>
         rw [total_ax_q1 hc]
         apply Proof.ax_q1
-        admit
+        sorry
     | ax_q2_svar =>
         rw [total_ax_q2_svar hc]
         apply Proof.ax_q2_svar
-        admit
+        sorry
     | ax_q2_nom =>
-        admit
+        sorry
     | ax_name =>
-        admit
+        sorry
     | ax_nom  =>
-        admit
+        sorry
     | ax_brcn =>
-        admit
+        sorry
     | mp pf1 pf2 ih1 ih2   =>
         rename_i ψ _
         rw [←hc] at pf1 ih1
 
-        admit
+        sorry
     | general =>
-        admit
+        sorry
     | necess  =>
-        admit
+        sorry

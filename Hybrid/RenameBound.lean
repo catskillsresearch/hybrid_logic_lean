@@ -13,10 +13,10 @@ def Form.replace_bound : Form N → SVAR → Form N
   | φ, _        => φ
 
 theorem replace_neg : (∼φ).replace_bound x = ∼(φ.replace_bound x) := by
-  admit
+  sorry
 
 theorem replace_bound_depth {φ : Form N} {x : SVAR} : (φ.replace_bound x).depth = φ.depth := by
-  admit
+  sorry
 
 theorem replace_bound_depth' {ψ : Form N} {x z : SVAR} : ((ψ.replace_bound x)[x//z]).depth < (ex x, ψ).depth := by
   rw [subst_depth', replace_bound_depth]
@@ -34,12 +34,12 @@ theorem substable_after_replace (φ : Form N) : is_substable (φ.replace_bound y
           apply And.intro
           . have : (φ.replace_bound y).new_var + y.letter ≥ y := by simp [SVAR.le, SVAR.add]
 
-            admit
+            sorry
           .
-            admit
-      . admit
-  | impl φ ψ ih1 ih2 => admit
-  | box φ ih => admit
+            sorry
+      . sorry
+  | impl φ ψ ih1 ih2 => sorry
+  | box φ ih => sorry
   | _ =>
       simp only [Form.replace_bound, is_substable]
 
