@@ -1,5 +1,3 @@
-import Hybrid.Form
-import Hybrid.Util
 import Hybrid.Substitutions
 
 structure Model (N : Set ℕ) where

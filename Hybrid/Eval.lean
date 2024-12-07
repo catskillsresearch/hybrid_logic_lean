@@ -8,7 +8,8 @@ structure Eval (N : Set ℕ) where
 
 theorem e_dn {e : Eval N} : e.f (∼φ) = false ↔ e.f φ = true := by
   simp only [Form.neg, ←Bool.not_eq_true, e.p1, e.p2, not_or, not_not, and_true];
-  sorry
+  refine and_iff_left_of_imp ?_
+  exact fun a => Bool.false_ne_true
 
 theorem e_neg {e : Eval N} : e.f (∼φ) = true ↔ e.f φ = false := by
   have c := @not_congr (e.f (∼φ) = false) (e.f φ = true) e_dn

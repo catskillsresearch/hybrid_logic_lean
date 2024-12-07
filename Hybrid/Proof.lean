@@ -2,6 +2,8 @@ import Mathlib
 import Hybrid.Form
 import Hybrid.Tautology
 
+set_option linter.docPrime false
+
 inductive Proof : Form N → Type where
   -- Deduction rules:
 

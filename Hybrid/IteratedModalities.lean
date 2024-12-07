@@ -1,4 +1,3 @@
-import Mathlib
 import Hybrid.Form
 
 -- Axiom utils. Since we won't be assuming a transitive frame,
