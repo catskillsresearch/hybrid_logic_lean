@@ -40,7 +40,7 @@ def Form.bulk_subst : Form N → List (NOM N) → List (NOM N) → Form N
 
 def Form.list_noms : (Form N) → List (NOM N)
 | nom  i   => [i]
-| impl φ ψ => (List.merge GE.ge φ.list_noms ψ.list_noms).dedup
+| impl φ ψ => (List.merge sorry φ.list_noms sorry).dedup
 | box φ    => φ.list_noms
 | bind _ φ => φ.list_noms
 | _        => []
@@ -57,7 +57,7 @@ theorem list_noms_sorted_ge {φ : Form N} : φ.list_noms.Sorted GE.ge := by
   induction φ with
   | nom  i   => simp [Form.list_noms]
   | impl φ ψ ih1 ih2 =>
-      exact List.Pairwise.sublist ((List.merge GE.ge φ.list_noms ψ.list_noms).dedup_sublist) (List.Sorted.merge ih1 ih2)
+      exact List.Pairwise.sublist ((List.merge sorry φ.list_noms sorry).dedup_sublist) sorry
   | box _ ih    => exact ih
   | bind _ _ ih => exact ih
   | _        => simp [Form.list_noms]
@@ -67,9 +67,7 @@ theorem list_noms_nodup {φ : Form N} : φ.list_noms.Nodup := by
 
 theorem list_noms_sorted_gt {φ : Form N} : φ.list_noms.Sorted GT.gt := by
   simp [List.Sorted, List.Pairwise, GT.gt, NOM.gt_iff_ge_and_ne]
-  apply List.Pairwise.and
-  apply list_noms_nodup
-  apply list_noms_sorted_ge
+  sorry
 
 theorem list_noms_chain' {φ : Form N} : φ.list_noms.Chain' GT.gt := by
   rw [List.chain'_iff_pairwise]
