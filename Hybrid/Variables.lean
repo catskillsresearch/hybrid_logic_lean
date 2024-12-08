@@ -152,38 +152,7 @@ lemma preserve_notfree {φ : Form N} (x v : SVAR) : (is_free x φ = false) → (
   intro h
   simp only [is_free, h, Bool.and_false]
 
-lemma subst_notfree_var {φ : Form N} {x y : SVAR} (h : is_free x φ = false) : (φ[y // x] = φ) ∧ (occurs x φ = false → is_substable φ y x) := by
-  induction φ with
-  | svar z =>
-      by_cases heq : x = z
-      . simp only [is_free, heq, beq_self_eq_true] at h
-      . simp only [subst_svar, heq, ite_false, occurs, is_substable]
-  | impl ψ χ ih1 ih2 =>
-      simp only [is_free, Bool.or_eq_false_eq_eq_false_and_eq_false] at h
-      apply And.intro
-      . simp [subst_svar, h, ih1, ih2]
-      . intro nocc
-        simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false] at nocc
-        simp [is_substable, h, nocc, ih1, ih2]
-  | box ψ ih  =>
-      rw [is_free] at h
-      apply And.intro
-      . simp [subst_svar, ih, h]
-      . intro nocc
-        rw [occurs] at nocc
-        simp [is_substable, ih, nocc, h]
-  | bind z ψ ih =>
-      apply And.intro
-      . by_cases heq : x = z
-        . rw [←heq, subst_svar, if_pos (Eq.refl x)]
-        . simp only [is_free, bne, Bool.and_eq_false_eq_eq_false_or_eq_false, Bool.not_eq_false', beq_iff_eq,
-          Ne.symm heq, false_or] at h
-          simp [subst_svar, heq, ih, h]
-      . intro nocc
-        rw [occurs] at nocc
-        simp [is_substable, notoccurs_notfree, nocc]
-  | _   =>
-      simp [subst_svar, is_substable]
+
 
   lemma rereplacement (φ : Form N) (x y : SVAR) (h1 : occurs y φ = false) (h2 : is_substable φ y x) : (is_substable (φ[y // x]) x y) ∧ φ[y // x][x // y] = φ := by
     induction φ with

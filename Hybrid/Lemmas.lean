@@ -1,7 +1,6 @@
-import Hybrid.Substitutions
 import Hybrid.Proof
 import Hybrid.Truth
-import Hybrid.Util
+
 open Classical
 
 theorem generalize_not_free (h1 : is_free v φ = false) : ⊨ (φ ⟷ (all v, φ)) := by

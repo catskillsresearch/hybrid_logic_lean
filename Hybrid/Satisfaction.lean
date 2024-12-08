@@ -1,3 +1,7 @@
+import Hybrid.Model
+
+set_option linter.docPrime false
+
 theorem bind_comm {M : Model N} {s : M.W} {g : I M.W} {φ : Form N} {x y : SVAR} : ((M,s,g) ⊨ all x, (all y, φ)) ↔ ((M,s,g) ⊨ all y, (all x, φ)) := by
   apply Iff.intro
   . intro h1

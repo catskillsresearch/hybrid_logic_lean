@@ -1,4 +1,3 @@
-import Hybrid.Model
 import Hybrid.Util
 import Hybrid.Variants
 import Hybrid.Satisfaction
