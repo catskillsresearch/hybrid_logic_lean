@@ -1,7 +1,6 @@
 
 import Hybrid.FormSubstitution
 
-
 set_option trace.split.failure true
 
 lemma svar_eq {ψ χ : SVAR} : ψ = χ ↔ ψ.1 = χ.1 := by
@@ -78,36 +77,6 @@ lemma ge_new_var_is_new (h : x ≥ φ.new_var) : occurs x φ = false := by
   have b := Nat.lt_irrefl φ.new_var.letter
   exact b a
 
-lemma new_var_geq1 : x ≥ (φ ⟶ ψ).new_var → (x ≥ φ.new_var ∧ x ≥ ψ.new_var) := by
-intro h
-simp [Form.new_var, max] at *
-split at h
-. apply And.intro
-  . assumption
-  . apply Nat.le_trans _ h
-    apply Nat.le_of_lt
-    assumption
-. apply And.intro
-  . simp at *
-    apply Nat.le_trans _ h
-    assumption
-  . assumption
-
-lemma new_var_geq2 : x ≥ (all y, ψ).new_var → (x ≥ (y+1) ∧ x ≥ ψ.new_var) := by
-intro h
-simp [Form.new_var, max] at *
-split at h
-. apply And.intro
-  . apply Nat.le_trans _ h
-    apply Nat.le_of_lt
-    assumption
-  . assumption
-. apply And.intro
-  . assumption
-  . simp at *
-    apply Nat.le_trans _ h
-    assumption
-
 lemma new_var_geq3 : x ≥ (□ φ).new_var → (x ≥ φ.new_var) := by simp [Form.new_var]
 
 lemma notfree_after_subst {φ : Form N} {x y : SVAR} (h : x ≠ y) : is_free x (φ[y // x]) = false := by
@@ -152,48 +121,46 @@ lemma preserve_notfree {φ : Form N} (x v : SVAR) : (is_free x φ = false) → (
   intro h
   simp only [is_free, h, Bool.and_false]
 
+lemma rereplacement (φ : Form N) (x y : SVAR) (h1 : occurs y φ = false) (h2 : is_substable φ y x) : (is_substable (φ[y // x]) x y) ∧ φ[y // x][x // y] = φ := by
+  induction φ with
+  | svar z =>
+      simp [occurs] at h1
+      by_cases xz : x = z
+      repeat simp [subst_svar, xz, h1, is_substable]
+  | impl ψ χ ih1 ih2 =>
+      simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false] at h1
+      simp only [is_substable, Bool.and_eq_true] at h2
+      simp [subst_svar, ih1, ih2, h1, h2, is_substable]
+  | box ψ ih =>
+      simp only [occurs] at h1
+      simp only [is_substable] at h2
+      simp [subst_svar, ih, h1, h2, is_substable]
+  | bind z ψ ih =>
+      by_cases yz : y = z
+      . rw [←yz]
+        rw [←yz] at h1
 
+        simp only [is_substable, beq_iff_eq, ←yz, bne_self_eq_false, Bool.false_and, ite_eq_left_iff,
+          Bool.not_eq_false, implication_disjunction, Bool.not_eq_true, or_false] at h2
+        have h2 := @preserve_notfree N ψ x y h2
+        simp [subst_notfree_var, h2]
 
-  lemma rereplacement (φ : Form N) (x y : SVAR) (h1 : occurs y φ = false) (h2 : is_substable φ y x) : (is_substable (φ[y // x]) x y) ∧ φ[y // x][x // y] = φ := by
-    induction φ with
-    | svar z =>
-        simp [occurs] at h1
-        by_cases xz : x = z
-        repeat simp [subst_svar, xz, h1, is_substable]
-    | impl ψ χ ih1 ih2 =>
-        simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false] at h1
-        simp only [is_substable, Bool.and_eq_true] at h2
-        simp [subst_svar, ih1, ih2, h1, h2, is_substable]
-    | box ψ ih =>
-        simp only [occurs] at h1
-        simp only [is_substable] at h2
-        simp [subst_svar, ih, h1, h2, is_substable]
-    | bind z ψ ih =>
-        by_cases yz : y = z
-        . rw [←yz]
-          rw [←yz] at h1
-
-          simp only [is_substable, beq_iff_eq, ←yz, bne_self_eq_false, Bool.false_and, ite_eq_left_iff,
-            Bool.not_eq_false, implication_disjunction, Bool.not_eq_true, or_false] at h2
-          have h2 := @preserve_notfree N ψ x y h2
-          simp [subst_notfree_var, h2]
-
-          have := @subst_notfree_var N (all y, ψ) y x (notoccurs_notfree h1)
-          simp [@subst_notfree_var N (all y, ψ) y x, notoccurs_notfree, h1]
-        . by_cases xz : x = z
-          . have : is_free x (all x, ψ) = false := by simp [is_free]
-            rw [←xz] at h1
-            simp [←xz, subst_notfree_var, this, notoccurs_notfree, h1]
-          . simp only [occurs] at h1
-            simp [subst_svar, xz, yz]
-            by_cases xfree : is_free x ψ
-            . simp [is_substable, xfree, Ne.symm yz, bne] at h2
-              simp [ih, h1, h2, is_substable, bne, Ne.symm xz]
-            . rw [show (¬is_free x ψ = true ↔ is_free x ψ = false) by simp] at xfree
-              simp [subst_notfree_var, xfree, is_substable, (notoccurs_notfree h1)]
-    | _     =>
-        apply And.intro
-        repeat rfl
+        have := @subst_notfree_var N (all y, ψ) y x (notoccurs_notfree h1)
+        simp [@subst_notfree_var N (all y, ψ) y x, notoccurs_notfree, h1]
+      . by_cases xz : x = z
+        . have : is_free x (all x, ψ) = false := by simp [is_free]
+          rw [←xz] at h1
+          simp [←xz, subst_notfree_var, this, notoccurs_notfree, h1]
+        . simp only [occurs] at h1
+          simp [subst_svar, xz, yz]
+          by_cases xfree : is_free x ψ
+          . simp [is_substable, xfree, Ne.symm yz, bne] at h2
+            simp [ih, h1, h2, is_substable, bne, Ne.symm xz]
+          . rw [show (¬is_free x ψ = true ↔ is_free x ψ = false) by simp] at xfree
+            simp [subst_notfree_var, xfree, is_substable, (notoccurs_notfree h1)]
+  | _     =>
+      apply And.intro
+      repeat rfl
 
 lemma subst_self_is_self (φ : Form N) (x : SVAR) : φ [x // x] = φ := by
   induction φ with

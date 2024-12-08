@@ -1,4 +1,5 @@
-import Hybrid.NominalSubstitution
+import Hybrid.Util
+import Hybrid.Variables
 
 lemma nom_svar_subst_symm {v x y : SVAR} {i : NOM N} (h : y ≠ x) : φ[x//i][v//y] = φ[v//y][x//i] := by
   induction φ <;> simp [subst_svar, nom_subst_svar, *] at *
@@ -28,6 +29,36 @@ theorem nom_subst_nocc (h : nom_occurs i χ = false) (y : SVAR) : χ[y // i] = �
 
 theorem subst_collect_all_nocc (h : nom_occurs i χ = false) (x y : SVAR) : χ[i // x][y // i] = χ[y // x] := by
   rw [subst_collect_all, nom_subst_nocc h y]
+
+lemma new_var_geq1 : x ≥ (φ ⟶ ψ).new_var → (x ≥ φ.new_var ∧ x ≥ ψ.new_var) := by
+  intro h
+  simp [Form.new_var, max] at *
+  split at h
+  . apply And.intro
+  . assumption
+  . apply Nat.le_trans _ h
+    apply Nat.le_of_lt
+    assumption
+  . apply And.intro
+  . simp at *
+    apply Nat.le_trans _ h
+    assumption
+  . assumption
+
+lemma new_var_geq2 : x ≥ (all y, ψ).new_var → (x ≥ (y+1) ∧ x ≥ ψ.new_var) := by
+  intro h
+  simp [Form.new_var, max] at *
+  split at h
+  . apply And.intro
+  . apply Nat.le_trans _ h
+    apply Nat.le_of_lt
+    assumption
+  . assumption
+  . apply And.intro
+  . assumption
+  . simp at *
+    apply Nat.le_trans _ h
+    assumption
 
 lemma nom_svar_rereplacement {φ : Form N} {i : NOM N} (h : x ≥ φ.new_var) : φ[x // i][i // x] = φ := by
   induction φ <;> simp [nom_subst_svar, subst_nom]

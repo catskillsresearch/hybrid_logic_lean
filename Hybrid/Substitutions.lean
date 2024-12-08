@@ -1,5 +1,4 @@
 import Hybrid.Nominals
-import Hybrid.Variables
 
 theorem subst_depth {i : NOM N} {x : SVAR} {φ : Form N} : φ[i // x].depth = φ.depth := by
   induction φ <;> simp [subst_nom, Form.depth, *] at *
