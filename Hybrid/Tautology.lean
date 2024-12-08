@@ -2,9 +2,6 @@ import Hybrid.Eval
 
 def Tautology (φ : Form N) : Prop := ∀ e : Eval N, e.f φ = true
 
-theorem hs_taut : Tautology ((φ ⟶ ψ) ⟶ (ψ ⟶ χ) ⟶ (φ ⟶ χ)) := by
-  sorry
-
 theorem ax_1 : Tautology (φ ⟶ ψ ⟶ φ) := by
   intro e
   simp only [e.p2, Bool.not_eq_true, or_comm, ←or_assoc, Bool.dichotomy, true_or]

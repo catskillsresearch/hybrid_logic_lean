@@ -1,5 +1,7 @@
 import Hybrid.Substitutions
 
+set_option linter.docPrime false
+
 structure Model (N : Set ℕ) where
   W : Type
   R : W → W → Prop
