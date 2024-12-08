@@ -30,6 +30,13 @@ lemma l313 {τ χ : Form N} (h1 : is_substable χ y x) (h2 : occurs y τ = false
   have l13 := hs l12 ax_brcn_contrap
   exact l13
 
+theorem Form.new_var_properties (φ : Form N) : ∃ x : SVAR, x ≥ φ.new_var ∧ occurs x φ = false ∧ (∀ y : SVAR, is_substable φ x y) := by
+  exists φ.new_var
+  simp [SVAR.le, new_var_is_new]
+  intro
+  apply new_var_subst''
+  simp [SVAR.le]
+
 lemma l313' {Δ : Set (Form N)} (mcs : MCS Δ) (wit : witnessed Δ) (mem : ◇φ ∈ Δ) : ∀ ψ : Form N, has_wit_conj Δ ψ φ := by
   intro ψ
   unfold has_wit_conj

@@ -18,6 +18,25 @@ theorem hs_taut : Tautology ((φ ⟶ ψ) ⟶ (ψ ⟶ χ) ⟶ (φ ⟶ χ)) :=
 theorem hs (h1 : ⊢ (φ ⟶ ψ)) (h2 : ⊢ (ψ ⟶ χ)) : ⊢ (φ ⟶ χ) :=
   mp (mp (tautology hs_taut) h1) h2
 
+lemma notocc_beforeafter_subst {φ : Form N} {x y : SVAR} (h : occurs x φ = false) : occurs x (φ[y // x]) = false := by
+  induction φ with
+  | svar z   =>
+      by_cases xz : x = z
+      <;> simp [subst_svar, if_pos xz, xz, occurs, h] at *
+  | impl _ _ ih1 ih2 =>
+      simp [subst_svar, occurs, not_or, ih1, ih2, -implication_disjunction] at *
+      exact ⟨ih1 h.left, ih2 h.right⟩
+  | box _ ih    =>
+      simp [subst_svar, occurs, ih, -implication_disjunction] at *
+      exact ih h
+  | bind z ψ ih =>
+      by_cases xz : x = z
+      . simp [subst_svar, xz, occurs] at *
+        exact h
+      . simp [subst_svar, if_neg xz, occurs, ih, xz, h, -implication_disjunction] at *
+        exact ih h
+  | _        => simp only [occurs]
+
 theorem rename_bound {φ : Form N} (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((all x, φ) ⟷ all y, φ[y // x]) := by
   rw [Form.iff]
   apply mp

@@ -1,6 +1,6 @@
 
 import Hybrid.FormSubstitution
-import Hybrid.NominalSubstitution
+
 
 set_option trace.split.failure true
 
@@ -110,150 +110,6 @@ split at h
 
 lemma new_var_geq3 : x ≥ (□ φ).new_var → (x ≥ φ.new_var) := by simp [Form.new_var]
 
-lemma new_var_subst {φ : Form N} {i : NOM N} {x y : SVAR} (h : x ≥ φ.new_var) : is_substable (φ[y//i]) x y := by
-induction φ with
-| nom  j  =>
-    simp [nom_subst_svar]
-    split <;> simp [is_substable]
-| bind z ψ ih =>
-    simp only [Form.new_var, max, is_substable, beq_iff_eq, ite_eq_left_iff,
-        bne, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq,
-        Bool.not_eq_false, Bool.and_eq_true] at h ⊢
-    intro _
-    by_cases hc : (z + 1).letter > (Form.new_var ψ).letter
-    . simp [hc] at h
-      simp only [gt_iff_lt, ge_iff_le] at hc ih
-      have ih := ih (Nat.le_of_lt (Nat.lt_of_lt_of_le hc h))
-      have ne := Nat.ne_of_lt (Nat.lt_of_lt_of_le (Nat.lt_succ_self z.letter) h)
-      rw [of_eq_true (eq_self z), of_eq_true (eq_self x), SVAR.mk.injEq]
-      exact ⟨ne, ih⟩
-    . simp [hc] at h
-      simp only [gt_iff_lt, not_lt, ge_iff_le] at hc ih
-      have ih := ih h
-      have ne := Nat.ne_of_lt (Nat.le_trans (Nat.lt_of_lt_of_le (Nat.lt_succ_self z.letter) hc) h)
-      rw [of_eq_true (eq_self z), of_eq_true (eq_self x), SVAR.mk.injEq]
-      exact ⟨ne, ih⟩
-| impl ψ χ ih1 ih2 =>
-    simp [Form.new_var, max, is_substable, nom_subst_svar] at h ⊢
-    by_cases hc : (Form.new_var χ).letter < (Form.new_var ψ).letter
-    . simp [hc] at h
-      have := Nat.le_of_lt (Nat.lt_of_lt_of_le hc h)
-      exact ⟨ih1 h, ih2 this⟩
-    . simp [hc] at h
-      simp at hc
-      have := Nat.le_trans hc h
-      exact ⟨ih1 this, ih2 h⟩
-| box ψ ih         =>
-    simp [Form.new_var, is_substable, nom_subst_svar] at h ⊢
-    exact ih h
-| _  =>
-    simp [is_substable]
-
-lemma new_var_subst'' {φ : Form N} {x y : SVAR} (h : x ≥ φ.new_var) : is_substable φ x y := by
-induction φ with
-| bind z ψ ih =>
-    simp only [Form.new_var, max, is_substable, beq_iff_eq, ite_eq_left_iff,
-        bne, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq,
-        Bool.not_eq_false, Bool.and_eq_true] at h ⊢
-    intro _
-    by_cases hc : (z + 1).letter > (Form.new_var ψ).letter
-    . simp [hc] at h
-      simp only [gt_iff_lt, ge_iff_le] at hc ih
-      have ih := ih (Nat.le_of_lt (Nat.lt_of_lt_of_le hc h))
-      have ne := Nat.ne_of_lt (Nat.lt_of_lt_of_le (Nat.lt_succ_self z.letter) h)
-      rw [of_eq_true (eq_self z), of_eq_true (eq_self x), SVAR.mk.injEq]
-      exact ⟨ne, ih⟩
-    . simp [hc] at h
-      simp only [gt_iff_lt, not_lt, ge_iff_le] at hc ih
-      have ih := ih h
-      have ne := Nat.ne_of_lt (Nat.le_trans (Nat.lt_of_lt_of_le (Nat.lt_succ_self z.letter) hc) h)
-      rw [of_eq_true (eq_self z), of_eq_true (eq_self x), SVAR.mk.injEq]
-      exact ⟨ne, ih⟩
-| impl ψ χ ih1 ih2 =>
-    simp [Form.new_var, max, is_substable, nom_subst_svar] at h ⊢
-    by_cases hc : (Form.new_var χ).letter < (Form.new_var ψ).letter
-    . simp [hc] at h
-      have := Nat.le_of_lt (Nat.lt_of_lt_of_le hc h)
-      exact ⟨ih1 h, ih2 this⟩
-    . simp [hc] at h
-      simp at hc
-      have := Nat.le_trans hc h
-      exact ⟨ih1 this, ih2 h⟩
-| box ψ ih         =>
-    simp [Form.new_var, is_substable, nom_subst_svar] at h ⊢
-    exact ih h
-| _  =>
-    simp [is_substable]
-
-lemma scz {φ : Form N} (i : NOM N) (h : x ≥ φ.new_var) (hy : y ≠ x) : (is_free y φ) ↔ (is_free y (φ[x // i])) := by
-induction φ with
-| nom a       =>
-    simp [nom_subst_svar] ; split <;> simp [is_free, hy]
-| bind z ψ ih =>
-    simp [is_free, -implication_disjunction]
-    simp [new_var_geq2 h] at ih
-    simp [ih]
-| impl ψ χ ih1 ih2 =>
-    have ⟨ih1_cond, ih2_cond⟩ := new_var_geq1 h
-    simp [ih1_cond, ih2_cond] at ih1 ih2
-    simp [is_free, ih1, ih2]
-| box ψ ih         =>
-    simp [Form.new_var] at h
-    simp [h] at ih
-    simp [is_free, ih]
-| _ => simp [is_free]
-
-lemma new_var_subst' {φ : Form N} (i : NOM N) {x y : SVAR} (h1 : is_substable φ v y) (h2 : x ≥ φ.new_var) (h3 : y ≠ x) : is_substable (φ[x//i]) v y := by
-induction φ with
-| nom  a      => simp [nom_subst_svar]; split <;> simp [is_substable]
-| bind z ψ ih =>
-    have xge := (new_var_geq2 h2).right
-    have := @scz N x y ψ i xge h3
-    simp [←this, nom_subst_svar, is_substable, -implication_disjunction]
-    clear this
-    intro h
-    simp [is_substable, h] at h1
-    simp [h1, xge, ih]
-| impl ψ χ ih1 ih2  =>
-    simp [is_substable] at h1
-    simp [Form.new_var] at h2
-    have ⟨ih1_cond, ih2_cond⟩ := new_var_geq1 h2
-    simp [h1, h2, ih1_cond, ih2_cond] at ih1 ih2
-    simp [is_substable, ih1, ih2]
-| box ψ ih          =>
-    simp [is_substable] at h1
-    simp [Form.new_var] at h2
-    simp [h1, h2] at ih
-    simp [is_substable, ih]
-| _       =>  simp [nom_subst_svar, h1]
-
-lemma nom_subst_trans (i : NOM N) (x y : SVAR) (h : y ≥ φ.new_var) : φ[y // i][x // y] = φ[x // i] := by
-induction φ with
-| bttm => simp [nom_subst_svar, subst_svar]
-| prop => simp [nom_subst_svar, subst_svar]
-| nom _ =>
-  simp [nom_subst_svar]
-  split <;> simp [subst_svar]
-| svar z =>
-  have nocc := ge_new_var_is_new h
-  simp [subst_svar]
-  split <;> simp [nom_subst_svar, occurs] at *; contradiction
-| bind z ψ ih =>
-  simp [subst_svar]
-  have := new_var_geq2 h
-  by_cases hc : y = z
-  . exfalso
-    have := this.left
-    simp [hc] at this
-    have := Nat.ne_of_lt (Nat.lt_succ_of_le this)
-    contradiction
-  . simp [nom_subst_svar, ih this.right, hc]
-| impl ψ χ ih1 ih2 =>
-    simp [nom_subst_svar, subst_svar, ih1, ih2, new_var_geq1 h]
-| box ψ ih         =>
-    simp [Form.new_var] at h
-    simp [nom_subst_svar, subst_svar, ih, h]
-
 lemma notfree_after_subst {φ : Form N} {x y : SVAR} (h : x ≠ y) : is_free x (φ[y // x]) = false := by
   induction φ with
   | svar z   =>
@@ -269,25 +125,6 @@ lemma notfree_after_subst {φ : Form N} {x y : SVAR} (h : x ≠ y) : is_free x (
       . simp [subst_svar, xz, is_free]
       . simp [subst_svar, if_neg xz, is_free, ih]
   | _        => simp only [is_free]
-
-lemma notocc_beforeafter_subst {φ : Form N} {x y : SVAR} (h : occurs x φ = false) : occurs x (φ[y // x]) = false := by
-  induction φ with
-  | svar z   =>
-      by_cases xz : x = z
-      <;> simp [subst_svar, if_pos xz, xz, occurs, h] at *
-  | impl _ _ ih1 ih2 =>
-      simp [subst_svar, occurs, not_or, ih1, ih2, -implication_disjunction] at *
-      exact ⟨ih1 h.left, ih2 h.right⟩
-  | box _ ih    =>
-      simp [subst_svar, occurs, ih, -implication_disjunction] at *
-      exact ih h
-  | bind z ψ ih =>
-      by_cases xz : x = z
-      . simp [subst_svar, xz, occurs] at *
-        exact h
-      . simp [subst_svar, if_neg xz, occurs, ih, xz, h, -implication_disjunction] at *
-        exact ih h
-  | _        => simp only [occurs]
 
 lemma notoccursbind : occurs x φ = false → occurs x (all v, φ) = false := by
   simp [occurs]
@@ -420,10 +257,3 @@ lemma nec_subst {m : ℕ} {i : NOM N} {v : SVAR} : (iterate_nec m (v⟶φ))[i//v
   | succ n ih =>
       simp [iterate_nec, iterate_nec.loop, subst_nom] at ih ⊢
       rw [ih]
-
-theorem Form.new_var_properties (φ : Form N) : ∃ x : SVAR, x ≥ φ.new_var ∧ occurs x φ = false ∧ (∀ y : SVAR, is_substable φ x y) := by
-  exists φ.new_var
-  simp [SVAR.le, new_var_is_new]
-  intro
-  apply new_var_subst''
-  simp [SVAR.le]
