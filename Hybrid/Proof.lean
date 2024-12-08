@@ -1,8 +1,6 @@
-import Mathlib
-import Hybrid.Form
 import Hybrid.Tautology
-
-set_option linter.docPrime false
+import Hybrid.FormSubstitution
+import Hybrid.IteratedModalities
 
 inductive Proof : Form N → Type where
   -- Deduction rules:

@@ -1,4 +1,3 @@
-import Mathlib
 import Hybrid.Tautology
 
 theorem empty_list (L : List {_x : Form N | False}) : L = [] := by
