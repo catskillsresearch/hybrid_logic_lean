@@ -1,4 +1,4 @@
-import Hybrid.FormSubstitution
+import Hybrid.NominalSubstitution
 
 lemma nom_svar_subst_symm {v x y : SVAR} {i : NOM N} (h : y ≠ x) : φ[x//i][v//y] = φ[v//y][x//i] := by
   induction φ <;> simp [subst_svar, nom_subst_svar, *] at *

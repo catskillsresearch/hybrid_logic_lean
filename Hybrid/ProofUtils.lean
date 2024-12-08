@@ -52,6 +52,45 @@ theorem rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : 
     apply rename_bound
     repeat { simp [occurs, is_substable]; assumption }
 
+theorem conj_idempotent {e : Eval N} {Γ : Set (Form N)} {L : List Γ} (hyp : elem' L φ) : e.f (conjunction Γ L) ∧ e.f φ ↔ e.f (conjunction Γ L) := by
+  induction L with
+  | nil => simp [elem'] at hyp
+  | cons h t ih =>
+      by_cases eq : h.val == φ
+      . have := Eq.symm ((beq_iff_eq h.val φ).mp eq)
+        simp only [conjunction, e_conj, this, conj_comm, and_self_left]
+      . simp [elem', show (h.val == φ) = false by simp [eq]] at hyp
+        simp only [conjunction, e_conj, and_assoc, ih hyp]
+
+-- Instead of proving conjunction is associative, commutative and idempotent, we do 3-in-1:
+theorem conj_helper {e : Eval N} {Γ : Set (Form N)} {L : List Γ} (hyp : elem' L φ) : e.f (conjunction Γ (filter' L φ)⋀φ) = true ↔ e.f (conjunction Γ L) = true := by
+  induction L with
+  | nil         =>
+      simp [elem'] at hyp
+  | cons h t ih =>
+      by_cases eq : h.val == φ
+      . simp only [filter', eq, conjunction]
+        have := (beq_iff_eq h.val φ).mp (Eq.symm eq)
+        rw [this]
+        by_cases phi_in_t : elem' t φ
+        . conv => rhs; rw [e_conj, and_comm, conj_idempotent phi_in_t]
+          simp only [ih, phi_in_t]
+        . simp only [filter'_doesnt_filter, phi_in_t, e_conj, and_comm]
+      . simp [elem', eq] at hyp
+        simp only [hyp, e_conj, conj_comm, forall_true_left] at ih
+        rw [and_comm] at ih
+        simp only [filter', eq, conjunction, e_conj, and_assoc, ih]
+
+theorem deduction_helper {Γ : Set (Form N)} (L : List Γ) (φ ψ : Form N) (h : elem' L φ) :
+  Tautology ((conjunction Γ L ⟶ ψ) ⟶ (conjunction Γ (filter' L φ) ⟶ φ ⟶ ψ)) := by
+  intro e
+  rw [e_impl, e_impl, e_impl, e_impl]
+  intro h1 h2 h3
+  have l1 := (@e_conj N (conjunction Γ (filter' L φ)) φ e).mpr ⟨h2, h3⟩
+  rw [conj_helper h] at l1
+  exact h1 l1
+
+
 -- Quite bothersome to work with subtypes and coerce properly.
 -- The code looks ugly, but in essence it follows the proof given
 -- in LaTeX.
@@ -229,6 +268,16 @@ theorem Γ_disj_elim {φ : Form N} (h1 : Γ ⊢ (φ ⋁ ψ)) (h2 : Γ ⊢ (φ �
   have l4 := Γ_mp l3 h2
   have l5 := Γ_mp l4 h3
   exact l5
+
+lemma notfreeset {Γ : Set (Form N)} (L : List Γ) (hyp : ∀ ψ : Γ, is_free x ψ.1 = false) : is_free x (conjunction Γ L) = false := by
+  induction L with
+  | nil         =>
+      simp only [conjunction, is_free]
+  | cons h t ih =>
+      simp only [is_free, Bool.or_false, Bool.or_eq_false_eq_eq_false_and_eq_false]
+      apply And.intro
+      . exact hyp h
+      . exact ih
 
 theorem Γ_univ_intro {Γ : Set (Form N)} {φ : Form N} (h1 : ∀ ψ : Γ, is_free x ψ.1 = false) (h2 : occurs y φ = false) (h3 : is_substable φ y x) : Γ ⊢ φ → Γ ⊢ (all y, φ[y // x]) := by
   intro Γ_pf_φ

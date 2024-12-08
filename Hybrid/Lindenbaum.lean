@@ -45,6 +45,23 @@ lemma all_sets_in_family_tollens {enum : ℕ → Form N} {Γ : Set (Form N)} {c 
   rw [not_not] at hi
   exact all_sets_in_family i hi
 
+lemma ge_new_var_subst_nom {i : NOM N} {y : SVAR} : φ.new_var ≥ φ[i // y].new_var := by
+  induction φ <;> simp [Form.new_var, subst_nom, *] at *
+  . split <;> simp [Form.new_var, SVAR.le]
+  . simp [max]; split <;> split <;> simp [SVAR.le, *] at *; apply Nat.le_trans <;> assumption; apply Nat.le_of_lt; apply Nat.lt_of_le_of_lt <;> assumption
+  . simp [max] at *; split <;> split <;> simp [Form.new_var, SVAR.le, SVAR.add, max] at * <;> split <;> simp [SVAR.le, SVAR.add, *] at *;
+                      apply Nat.le_of_lt; apply Nat.lt_of_le_of_lt <;> assumption
+
+lemma ge_new_var_subst_helpr {i : NOM N} {x : SVAR} (h : y ≥ Form.new_var (χ⟶ψ)) : y ≥ Form.new_var (χ⟶ψ[i//x]⟶⊥) := by
+  simp [Form.new_var, max]
+  split <;> split
+  . exact (new_var_geq1 h).left
+  . apply Nat.le_trans
+    apply ge_new_var_subst_nom
+    exact (new_var_geq1 h).right
+  . exact (new_var_geq1 h).left
+  . simp [SVAR.le]
+
 -- Lemma: If Γ is consistent, then for all φ, lindenbaum_next Γ φ is consistent
 lemma consistent_lindenbaum_next (Γ : Set (Form N)) (hc : consistent Γ) (φ : Form N) : consistent (lindenbaum_next Γ φ) := by
   rw [lindenbaum_next]

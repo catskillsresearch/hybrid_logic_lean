@@ -1,5 +1,8 @@
 
-import Hybrid.Form
+import Hybrid.FormSubstitution
+import Hybrid.NominalSubstitution
+
+set_option trace.split.failure true
 
 lemma svar_eq {ψ χ : SVAR} : ψ = χ ↔ ψ.1 = χ.1 := by
   have l1 : ψ = ⟨ψ.letter⟩ := by simp
@@ -74,13 +77,6 @@ lemma ge_new_var_is_new (h : x ≥ φ.new_var) : occurs x φ = false := by
   have a := Nat.lt_of_le_of_lt h this
   have b := Nat.lt_irrefl φ.new_var.letter
   exact b a
-
-lemma ge_new_var_subst_nom {i : NOM N} {y : SVAR} : φ.new_var ≥ φ[i // y].new_var := by
-  induction φ <;> simp [Form.new_var, subst_nom, *] at *
-  . split <;> simp [Form.new_var, SVAR.le]
-  . simp [max]; split <;> split <;> simp [SVAR.le, *] at *; apply Nat.le_trans <;> assumption; apply Nat.le_of_lt; apply Nat.lt_of_le_of_lt <;> assumption
-  . simp [max] at *; split <;> split <;> simp [Form.new_var, SVAR.le, SVAR.add, max] at * <;> split <;> simp [SVAR.le, SVAR.add, *] at *;
-                      apply Nat.le_of_lt; apply Nat.lt_of_le_of_lt <;> assumption
 
 lemma new_var_geq1 : x ≥ (φ ⟶ ψ).new_var → (x ≥ φ.new_var ∧ x ≥ ψ.new_var) := by
 intro h
@@ -257,26 +253,6 @@ induction φ with
 | box ψ ih         =>
     simp [Form.new_var] at h
     simp [nom_subst_svar, subst_svar, ih, h]
-
-lemma ge_new_var_subst_helpr {i : NOM N} {x : SVAR} (h : y ≥ Form.new_var (χ⟶ψ)) : y ≥ Form.new_var (χ⟶ψ[i//x]⟶⊥) := by
-  simp [Form.new_var, max]
-  split <;> split
-  . exact (new_var_geq1 h).left
-  . apply Nat.le_trans
-    apply ge_new_var_subst_nom
-    exact (new_var_geq1 h).right
-  . exact (new_var_geq1 h).left
-  . simp [SVAR.le]
-
-lemma notfreeset {Γ : Set (Form N)} (L : List Γ) (hyp : ∀ ψ : Γ, is_free x ψ.1 = false) : is_free x (conjunction Γ L) = false := by
-  induction L with
-  | nil         =>
-      simp only [conjunction, is_free]
-  | cons h t ih =>
-      simp only [is_free, Bool.or_false, Bool.or_eq_false_eq_eq_false_and_eq_false]
-      apply And.intro
-      . exact hyp h
-      . exact ih
 
 lemma notfree_after_subst {φ : Form N} {x y : SVAR} (h : x ≠ y) : is_free x (φ[y // x]) = false := by
   induction φ with

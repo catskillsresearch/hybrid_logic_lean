@@ -79,10 +79,12 @@ theorem conj_elim_r : Tautology ((φ ⋀ ψ) ⟶ ψ) := by
 
 theorem conj_comm_t : Tautology ((φ ⋀ ψ) ⟶ (ψ ⋀ φ)) := by
   eval
+  sorry
 
 theorem conj_comm_t' : Tautology (∼(φ ⋀ ψ) ⟶ ∼(ψ ⋀ φ)) := by
   simp only [Form.neg, Form.conj]
   eval
+  sorry
 
 theorem iff_intro : Tautology ((φ ⟶ ψ) ⟶ (ψ ⟶ φ) ⟶ (φ ⟷ ψ)) := by
   sorry
@@ -127,24 +129,15 @@ theorem disj_elim : Tautology ((φ ⋁ ψ) ⟶ (φ ⟶ χ) ⟶ (ψ ⟶ χ) ⟶ �
 
 theorem idem : Tautology ((χ ⟶ ψ ⟶ ψ ⟶ φ) ⟶ (χ ⟶ ψ ⟶ φ)) := by
   eval
+  sorry
 
 theorem exp : Tautology (((φ ⋀ ψ) ⟶ χ) ⟶ (φ ⟶ ψ ⟶ χ)) := by
   intro e
-  simp only [e.p2, negated_disjunction, not_not, e_conj, Bool.not_eq_true]
-  let a := (e.f φ = true ∧ e.f ψ = true) ∧ e.f χ = false
-  have notate₁ : a ↔ (e.f φ = true ∧ e.f ψ = true) ∧ e.f χ = false := by simp
-  have notate₂ : ¬a ↔ e.f φ = false ∨ e.f ψ = false ∨ e.f χ = true := by simp [or_assoc]
-  rw [←notate₁, ←notate₂]
-  apply em
+  sorry
 
 theorem imp : Tautology ((φ ⟶ ψ ⟶ χ) ⟶ ((φ ⋀ ψ)) ⟶ χ) := by
   intro e
-  simp [e.p1, e.p2, not_or, not_not, Bool.not_eq_true, e_conj]
-  let a := (e.f φ = true ∧ e.f ψ = true ∧ e.f χ = false)
-  have notate₁ : a ↔ (e.f φ = true ∧ e.f ψ = true ∧ e.f χ = false) := by simp
-  have notate₂ : ¬a ↔ ((e.f φ = false ∨ e.f ψ = false) ∨ e.f χ = true) := by simp [or_assoc]
-  rw [←notate₁, ←notate₂]
-  apply em
+  sorry
 
 theorem impexp : Tautology (((φ ⋀ ψ) ⟶ χ) ⟷ (φ ⟶ ψ ⟶ χ)) := by
   intro e

@@ -1,3 +1,5 @@
+import Hybrid.Form
+
 def nom_subst_nom : Form N → NOM N → NOM N → Form N
 | .nom a, i, j     => if a = j then i else a
 | .impl φ ψ, i, j  => nom_subst_nom φ i j ⟶ nom_subst_nom ψ i j
