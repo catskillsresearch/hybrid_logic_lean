@@ -37,6 +37,47 @@ lemma notocc_beforeafter_subst {φ : Form N} {x y : SVAR} (h : occurs x φ = fal
         exact ih h
   | _        => simp only [occurs]
 
+lemma rereplacement (φ : Form N) (x y : SVAR) (h1 : occurs y φ = false) (h2 : is_substable φ y x) : (is_substable (φ[y // x]) x y) ∧ φ[y // x][x // y] = φ := by
+  induction φ with
+  | svar z =>
+      simp [occurs] at h1
+      by_cases xz : x = z
+      repeat simp [subst_svar, xz, h1, is_substable]
+  | impl ψ χ ih1 ih2 =>
+      simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false] at h1
+      simp only [is_substable, Bool.and_eq_true] at h2
+      simp [subst_svar, ih1, ih2, h1, h2, is_substable]
+  | box ψ ih =>
+      simp only [occurs] at h1
+      simp only [is_substable] at h2
+      simp [subst_svar, ih, h1, h2, is_substable]
+  | bind z ψ ih =>
+      by_cases yz : y = z
+      . rw [←yz]
+        rw [←yz] at h1
+
+        simp only [is_substable, beq_iff_eq, ←yz, bne_self_eq_false, Bool.false_and, ite_eq_left_iff,
+          Bool.not_eq_false, implication_disjunction, Bool.not_eq_true, or_false] at h2
+        have h2 := @preserve_notfree N ψ x y h2
+        simp [subst_notfree_var, h2]
+
+        have := @subst_notfree_var N (all y, ψ) y x (notoccurs_notfree h1)
+        simp [@subst_notfree_var N (all y, ψ) y x, notoccurs_notfree, h1]
+      . by_cases xz : x = z
+        . have : is_free x (all x, ψ) = false := by simp [is_free]
+          rw [←xz] at h1
+          simp [←xz, subst_notfree_var, this, notoccurs_notfree, h1]
+        . simp only [occurs] at h1
+          simp [subst_svar, xz, yz]
+          by_cases xfree : is_free x ψ
+          . simp [is_substable, xfree, Ne.symm yz, bne] at h2
+            simp [ih, h1, h2, is_substable, bne, Ne.symm xz]
+          . rw [show (¬is_free x ψ = true ↔ is_free x ψ = false) by simp] at xfree
+            simp [subst_notfree_var, xfree, is_substable, (notoccurs_notfree h1)]
+  | _     =>
+      apply And.intro
+      repeat rfl
+
 theorem rename_bound {φ : Form N} (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((all x, φ) ⟷ all y, φ[y // x]) := by
   rw [Form.iff]
   apply mp
@@ -335,6 +376,22 @@ theorem dn_equiv_premise {φ : Form N} : Γ ⊢ (∼∼φ) iff Γ ⊢ φ := by
     apply hs;
     repeat assumption
   )
+
+lemma pos_subst {m : ℕ} {i : NOM N} {v : SVAR} : (iterate_pos m (v⋀φ))[i//v] = iterate_pos m (i⋀φ[i//v]) := by
+  induction m with
+  | zero =>
+      simp [iterate_pos, iterate_pos.loop, subst_nom]
+  | succ n ih =>
+      simp [iterate_pos, iterate_pos.loop, subst_nom] at ih ⊢
+      rw [ih]
+
+lemma nec_subst {m : ℕ} {i : NOM N} {v : SVAR} : (iterate_nec m (v⟶φ))[i//v] = iterate_nec m (i⟶φ[i//v]) := by
+  induction m with
+  | zero =>
+      simp [iterate_nec, iterate_nec.loop, subst_nom]
+  | succ n ih =>
+      simp [iterate_nec, iterate_nec.loop, subst_nom] at ih ⊢
+      rw [ih]
 
 theorem ax_nom_instance {φ : Form N} (i : NOM N) (m n : ℕ) : ⊢ (iterate_pos m (i ⋀ φ) ⟶ iterate_nec n (i ⟶ φ)) := by
   let x := φ.new_var
