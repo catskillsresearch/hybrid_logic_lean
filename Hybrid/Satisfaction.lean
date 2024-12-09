@@ -1,4 +1,4 @@
-import Hybrid.Model
+import Hybrid.Variants
 
 set_option linter.docPrime false
 

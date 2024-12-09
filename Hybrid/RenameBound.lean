@@ -1,5 +1,4 @@
 import Hybrid.Soundness
-import Hybrid.Substitutions
 import Hybrid.ProofUtils
 
 def Form.replace_bound : Form N → SVAR → Form N

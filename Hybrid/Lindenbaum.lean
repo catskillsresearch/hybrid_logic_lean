@@ -1,4 +1,3 @@
-import Hybrid.Substitutions
 import Hybrid.ProofUtils
 import Hybrid.FormCountable
 set_option linter.docPrime false

@@ -1,5 +1,3 @@
-import Hybrid.Util
-import Hybrid.Variants
 import Hybrid.Satisfaction
 
 theorem D_help {Γ : Set (Form N)} : ((M,s,g)⊨Γ ∪ {φ}) ↔ (((M,s,g)⊨Γ) ∧ (M,s,g) ⊨ {φ}) := by

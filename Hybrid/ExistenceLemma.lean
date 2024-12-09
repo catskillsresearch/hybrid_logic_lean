@@ -1,5 +1,4 @@
 import Hybrid.Lindenbaum
-import Hybrid.ProofUtils
 
 open Proof
 
