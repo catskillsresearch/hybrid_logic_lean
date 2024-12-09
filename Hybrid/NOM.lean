@@ -1,4 +1,3 @@
-import Mathlib
 import Hybrid.TotalSet
 
 structure NOM (N : Set ℕ) where

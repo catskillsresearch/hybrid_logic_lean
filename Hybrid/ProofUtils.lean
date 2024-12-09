@@ -2,7 +2,7 @@ import Hybrid.Substitutions
 import Hybrid.Proof
 import Hybrid.ListUtils
 
-set_option linter.docPrime false`
+set_option linter.docPrime false
 
 theorem iff_mp (h : ⊢ (φ ⟷ ψ)) : ⊢ (φ ⟶ ψ) :=
   mp (tautology conj_elim_l) h

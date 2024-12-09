@@ -1,5 +1,3 @@
-import Mathlib
-import Hybrid.TotalSet
 import Hybrid.PROP
 import Hybrid.SVAR
 import Hybrid.NOM
