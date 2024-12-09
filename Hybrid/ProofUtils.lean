@@ -1,7 +1,6 @@
 import Hybrid.Substitutions
 import Hybrid.Proof
 import Hybrid.ListUtils
-import Hybrid.Util
 
 set_option linter.docPrime false`
 

@@ -1,4 +1,4 @@
-import Hybrid.Util
+import Hybrid.FormSubstitution
 import Hybrid.Variables
 
 lemma nom_svar_subst_symm {v x y : SVAR} {i : NOM N} (h : y ≠ x) : φ[x//i][v//y] = φ[v//y][x//i] := by
@@ -24,8 +24,6 @@ theorem nom_subst_nocc (h : nom_occurs i χ = false) (y : SVAR) : χ[y // i] = �
   . intro; apply h; apply Eq.symm; assumption
   . simp [h] at *
     apply And.intro <;> assumption
-  . simp [h] at *; assumption
-  . simp [h] at *; assumption
 
 theorem subst_collect_all_nocc (h : nom_occurs i χ = false) (x y : SVAR) : χ[i // x][y // i] = χ[y // x] := by
   rw [subst_collect_all, nom_subst_nocc h y]
@@ -95,58 +93,6 @@ lemma nec_subst_nom {m : ℕ} {i : NOM N} {v x : SVAR} : (iterate_nec m (v⟶φ)
 
 lemma diffsvar {v x : SVAR} (h : x ≥ v+1) : v ≠ x := by
   simp; intro abs; exact (Nat.ne_of_lt (Nat.lt_of_lt_of_le (Nat.lt_succ_self v.letter) h)) (SVAR.mk.inj abs)
-
-section New_NOM
-lemma new_nom_gt      : nom_occurs i φ → i.letter < φ.new_nom.letter   := by
-  induction φ with
-  | nom i          =>
-      simp [nom_occurs, Form.new_nom, -implication_disjunction]
-      intro h
-      rw [h]
-      exact Nat.lt_succ_self i.letter
-  | impl ψ χ ih1 ih2 =>
-      simp only [nom_occurs, Form.new_nom, Bool.or_eq_true, max]
-      intro h
-      apply Or.elim h
-      . intro ha
-        clear ih2 h
-        have ih1 := ih1 ha
-        by_cases hc : (Form.new_nom ψ).letter > (Form.new_nom χ).letter
-        . simp [hc]
-          assumption
-        . simp [hc]
-          simp at hc
-          exact Nat.lt_of_lt_of_le ih1 hc
-      . intro hb
-        clear ih1 h
-        have ih2 := ih2 hb
-        by_cases hc : (Form.new_nom ψ).letter > (Form.new_nom χ).letter
-        . simp [hc]
-          simp at hc
-          exact Nat.lt_trans ih2 hc
-        . simp [hc]
-          assumption
-  | box      =>
-      assumption
-  | bind     =>
-      assumption
-  | _ => simp [nom_occurs]
-
-lemma new_nom_is_nom  : nom_occurs (φ.new_nom) φ = false := by
-  rw [←Bool.eq_false_eq_not_eq_true]
-  intro h
-  have a := new_nom_gt h
-  have b := Nat.lt_irrefl φ.new_nom.letter
-  exact b a
-
-lemma ge_new_nom_is_new (h : x ≥ φ.new_nom) : nom_occurs x φ = false := by
-  rw [←Bool.eq_false_eq_not_eq_true]
-  intro habs
-  have := new_nom_gt habs
-  have a := Nat.lt_of_le_of_lt h this
-  have b := Nat.lt_irrefl φ.new_nom.letter
-  exact b a
-end New_NOM
 
 -- just remove this definition, it is completely redundant...
 def descending (l : List (NOM N)) : Prop :=

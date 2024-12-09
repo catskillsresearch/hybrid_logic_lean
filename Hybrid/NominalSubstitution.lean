@@ -1,4 +1,5 @@
 import Hybrid.Form
+import Hybrid.New_NOM
 
 def nom_subst_nom : Form N → NOM N → NOM N → Form N
 | .nom a, i, j     => if a = j then i else a
@@ -16,13 +17,6 @@ def nom_subst_svar : Form N → SVAR → NOM N → Form N
 
 notation:150 φ "[" i "//" a "]" => nom_subst_nom φ i a
 notation:150 φ "[" i "//" a "]" => nom_subst_svar φ i a
-
-def nom_occurs : NOM N → Form N → Bool
-| i, .nom j    => i = j
-| i, .impl ψ χ => (nom_occurs i ψ) || (nom_occurs i χ)
-| i, .box ψ    => nom_occurs i ψ
-| i, .bind _ ψ => nom_occurs i ψ
-| _, _         => false
 
 def all_nocc (i : NOM N) (Γ : Set (Form N)) := ∀ (φ : Form N), φ ∈ Γ → nom_occurs i φ = false
 
