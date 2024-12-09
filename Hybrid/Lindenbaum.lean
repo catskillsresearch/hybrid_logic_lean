@@ -1,7 +1,7 @@
 import Hybrid.Substitutions
 import Hybrid.ProofUtils
 import Hybrid.FormCountable
-
+set_option linter.docPrime false
 open Classical
 
 -- First, we define how to obtain Γᵢ₊₁ from Γᵢ, given a formula φ:
@@ -61,6 +61,131 @@ lemma ge_new_var_subst_helpr {i : NOM N} {x : SVAR} (h : y ≥ Form.new_var (χ�
     exact (new_var_geq1 h).right
   . exact (new_var_geq1 h).left
   . simp [SVAR.le]
+
+
+theorem generalize_constants {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ φ → ⊢ (all x, φ[x // i]) := by
+  intro pf
+  apply general x
+  induction pf generalizing x with
+  | @tautology φ ht      =>
+      apply tautology
+      simp [Tautology] at ht ⊢
+      intro e
+      let f'  : Form N → Bool := λ φ => if (e.f <| φ[x//i]) then true else false
+      let e'  : Eval N := ⟨f', by simp [e.p1, nom_subst_svar], by simp [e.p2, nom_subst_svar]⟩
+      rw [show ((e.f <| φ[x//i]) ↔ e'.f φ) by simp]
+      exact ht e'
+  | @general φ v _ ih   =>
+      simp only [nom_subst_svar, Form.new_var, max] at h ⊢
+      by_cases hc : (v + 1).letter > (Form.new_var φ).letter
+      . simp [hc] at h
+        simp only [gt_iff_lt] at hc
+        have := ih (Nat.le_of_lt (Nat.lt_of_lt_of_le hc h))
+        exact general v this
+      . simp [hc] at h
+        exact general v (ih h)
+  | @necess   ψ _ ih     =>
+      simp only [nom_subst_svar, occurs] at h ⊢
+      apply necess; apply ih; assumption
+  | @mp φ ψ _ _ ih1 ih2  =>
+      simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false, not_and,
+        Bool.not_eq_false] at ih1
+      -- show ψ[y // i] for some y that does not
+      --    occur in either φ or ψ
+      -- generalize, get  all y, ψ[y // i]
+      -- then apply axiom Q2 and get:
+      --                   (ψ[y // i])[x // y]
+      -- this should bring you to:
+      --                   ψ[x // i]
+      let y := (φ ⟶ ψ).new_var
+      have ih1_cond : y ≥ (φ⟶ψ).new_var := Nat.le.refl
+      have ⟨ih2_cond, sub_cond⟩ := new_var_geq1 ih1_cond
+      have ih1 := ih1 ih1_cond
+      have ih2 := ih2 ih2_cond
+      rw [nom_subst_svar] at ih1
+      have l1  := general y (mp ih1 ih2)
+      have l2  := ax_q2_svar (ψ[y//i]) y x (new_var_subst h)
+      have l3  := mp l2 l1
+      rw [nom_subst_trans i x y sub_cond] at l3
+      exact l3
+  | @ax_k φ ψ            =>
+      simp only [nom_subst_svar]
+      apply ax_k
+  | @ax_q1 φ ψ v h2       =>
+      simp only [nom_subst_svar]
+      apply ax_q1
+      have := new_var_geq2 (new_var_geq1 h).left
+      have ha : x ≥ φ.new_var := (new_var_geq1 this.right).left
+      have hb : v ≠ x := diffsvar this.left
+      have := (scz i ha hb).mpr
+      rw [contraposition, Bool.not_eq_true, Bool.not_eq_true] at this
+      apply this
+      exact h2
+  | @ax_q2_svar φ y v h2  =>
+      have := new_var_geq2 (new_var_geq1 h).left
+      have c2 : x ≥ φ.new_var := this.right
+      have c3 : y ≠ x := diffsvar this.left
+      have c  := new_var_subst' i h2 c2 c3
+      have l1 := ax_q2_svar (φ[x//i]) y v c
+      rw [nom_svar_subst_symm c3] at l1
+      exact l1
+  | @ax_q2_nom  φ v j    =>
+      simp [nom_subst_svar]
+      have f3 := diffsvar (new_var_geq2 (new_var_geq1 h).left).left
+      by_cases ji : j = i
+      . rw [ji] at h ⊢
+        have f2 := (new_var_geq2 (new_var_geq1 h).left).right
+        have f1 := @new_var_subst'' N φ x v f2
+        have := new_var_subst' i f1 f2 f3
+        have := ax_q2_svar (φ[x//i]) v x this
+        rw [subst_collect_all]
+        exact this
+      . rw [←(nom_nom_subst_symm ji f3)]
+        exact ax_q2_nom (φ[x//i]) v j
+  | @ax_name    v        =>
+      exact ax_name v
+  | @ax_nom   φ v m n    =>
+      simp only [nom_subst_svar, nec_subst_nom, pos_subst_nom]
+      apply ax_nom
+  | @ax_brcn  φ v        =>
+      apply ax_brcn
+
+lemma generalize_constants_rev {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ (all x, φ[x // i]) → ⊢ φ := by
+  intro pf
+  have l1 := ax_q2_nom (φ[x//i]) x i
+  have l2 := mp l1 pf
+  rw [svar_svar_nom_subst h, nom_subst_self] at l2
+  exact l2
+
+theorem generalize_constants_iff {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ φ iff ⊢ (all x, φ[x // i]) := by
+  apply TypeIff.intro
+  . apply generalize_constants; assumption
+  . apply generalize_constants_rev; assumption
+
+theorem rename_constants (j i : NOM N) (h : nom_occurs j φ = false) : ⊢ φ iff ⊢ (φ[j // i]) := by
+  apply TypeIff.intro
+  . intro pf
+    let x := φ.new_var
+    have x_geq : x ≥ φ.new_var := by simp; apply Nat.le_refl
+    have l1 := generalize_constants i x_geq pf
+    have l2 := ax_q2_nom (φ[x // i]) x j
+    have l3 := mp l2 l1
+    have : φ[x//i][j//x] = φ[j//i] := svar_svar_nom_subst x_geq
+    rw [this] at l3
+    exact l3
+  . intro pf
+    let x := (φ[j//i]).new_var
+    have x_geq : x ≥ (φ[j//i]).new_var := by simp; apply Nat.le_refl
+    have l1 := generalize_constants j x_geq pf
+    have : φ[j//i][x//j] = φ[x//i] := dbl_subst_nom i h
+    rw [this] at l1
+    have l2 := ax_q2_nom (φ[x // i]) x i
+    have l3 := mp l2 l1
+    rw [←eq_new_var] at x_geq
+    have : φ[x//i][i//x] = φ[i//i] := svar_svar_nom_subst x_geq
+    rw [nom_subst_self] at this
+    rw [this] at l3
+    exact l3
 
 -- Lemma: If Γ is consistent, then for all φ, lindenbaum_next Γ φ is consistent
 lemma consistent_lindenbaum_next (Γ : Set (Form N)) (hc : consistent Γ) (φ : Form N) : consistent (lindenbaum_next Γ φ) := by
