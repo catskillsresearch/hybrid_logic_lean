@@ -65,7 +65,6 @@ theorem sat_odd_noms {φ : Form TotalSet} : ((M,s,g) ⊨ φ) ↔ ((M.odd_noms,s,
   | _ => simp [Form.odd_noms, Model.odd_noms]
 
 theorem sat_odd_noms' {φ : Form TotalSet} : ((M,s,g) ⊨ φ.odd_noms) ↔ ((M.odd_noms_inv,s,g) ⊨ φ) := by
---  conv => rhs; rw [sat_odd_noms]
   induction φ generalizing s g with
   | nom i =>
       simp [odd_nom, Model.odd_noms, Model.odd_noms_inv]

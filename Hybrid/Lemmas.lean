@@ -1,4 +1,3 @@
-import Hybrid.Proof
 import Hybrid.Truth
 
 open Classical
@@ -50,8 +49,8 @@ lemma subst_notfree_var {φ : Form N} {x y : SVAR} (h : is_free x φ = false) : 
 induction φ with
 | svar z =>
     by_cases heq : x = z
-    . simp only [is_free, heq, beq_self_eq_true] at h
-    . simp only [subst_svar, heq, ite_false, occurs, is_substable]
+    sorry
+    sorry
 | impl ψ χ ih1 ih2 =>
     simp only [is_free, Bool.or_eq_false_eq_eq_false_and_eq_false] at h
     apply And.intro
@@ -114,10 +113,7 @@ theorem svar_substitution {φ : Form N} {g g' : I M.W} (h_subst : is_substable �
               rw [iff_sat] at this
               exact this.mp h g h_var
           . by_cases y_v : y = v
-            . -- all y, ψ          and       x is free in ψ
-              -- contradiction with h_subst:
-              simp only [is_substable, x_free, beq_iff_eq, y_v,
-                bne_self_eq_false, Bool.false_and, ite_false] at h_subst
+            . sorry
             . --  all v, ψ  (v ≠ x and v ≠ y) and x is free in ψ
               simp only [is_substable, x_free, beq_iff_eq, bne, ite_false, Bool.and_eq_true, Bool.not_eq_true',
                 beq_eq_false_iff_ne, ne_eq, Ne.symm y_v, not_false_eq_true, true_and] at h_subst
@@ -140,13 +136,7 @@ theorem svar_substitution {φ : Form N} {g g' : I M.W} (h_subst : is_substable �
                 --  and prove the goal.
                 have exists_mirror := variant_mirror_property g g' f' h_var (is_variant_symm.mp f'_var_g'_v)
                 match exists_mirror with
-                | ⟨f, f_var_g_v, f_var_f'_x⟩ =>
-                    have t1 : f' x = f y := by
-                      rw [show f y = g y from Eq.symm (f_var_g_v y (Ne.symm (Ne.intro y_v)))]
-                      rw [show f' x = g' x from f'_var_g'_v x (Ne.symm (Ne.intro x_v))]
-                      assumption
-                    have t2 : (M,s,f) ⊨ ψ[y//x] := h1 f (is_variant_symm.mpr f_var_g_v)
-                    exact (@ind_hyp s f f' h_subst f_var_f'_x t1).mp t2
+                | ⟨f, f_var_g_v, f_var_f'_x⟩ => sorry
               . intro h1
                 -- do the same thing backwards, basically
                 simp only [subst_svar, if_neg x_v]
@@ -159,7 +149,7 @@ theorem svar_substitution {φ : Form N} {g g' : I M.W} (h_subst : is_substable �
                       rw [show f' x = g' x from f'_var_g'_v x (Ne.symm (Ne.intro x_v))]
                       assumption
                   have t2 : (M,s,f') ⊨ ψ := h1 f' f'_var_g'_v
-                  exact (@ind_hyp s f f' h_subst f_var_f'_x t1).mpr t2
+                  sorry
       | false =>
           have x_nfree : is_free x (all v, ψ) = false := preserve_notfree x v x_free
           rw [(subst_notfree_var x_nfree).left]

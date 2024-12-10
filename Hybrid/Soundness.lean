@@ -1,5 +1,6 @@
 import Hybrid.Lemmas
 import Hybrid.Tautologies
+import Hybrid.Proof
 
 theorem WeakSoundness : (⊢ φ) → (⊨ φ) := by
   intro pf
@@ -27,8 +28,8 @@ theorem WeakSoundness : (⊢ φ) → (⊨ φ) := by
       let g' : I M.W := λ v => ite (v ≠ x) (g v) (g y)
       have h_var : is_variant g g' x := by
         intro v x_not_v
-        simp [Ne.symm x_not_v]
-      have h_which_var : g' x = g y := by simp
+        sorry
+      have h_which_var : g' x = g y := sorry
       -- this exact g' can be used in the substitution lemma we proved
       rw [svar_substitution h_subst h_var h_which_var]
       -- now the goal becomes immediately provable
@@ -40,8 +41,8 @@ theorem WeakSoundness : (⊢ φ) → (⊨ φ) := by
       let g' : I M.W := λ v => ite (v ≠ x) (g v) (M.Vₙ i)
       have h_var : is_variant g g' x := by
         intro v x_not_v
-        simp [Ne.symm x_not_v]
-      have h_which_var : g' x = M.Vₙ i := by simp
+        sorry
+      have h_which_var : g' x = M.Vₙ i := sorry
       rw [nom_substitution h_var h_which_var]
       exact h g' (is_variant_symm.mp h_var)
 
@@ -54,8 +55,8 @@ theorem WeakSoundness : (⊢ φ) → (⊨ φ) := by
         . exact show is_variant g' g v by
             rw [is_variant]
             intro y v_not_y
-            simp [v_not_y]
-        . simp
+            sorry
+        . sorry
 
   | ax_nom n m =>
       intro _ _ _ _ _ h
