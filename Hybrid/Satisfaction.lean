@@ -24,8 +24,7 @@ theorem bind_comm {M : Model N} {s : M.W} {g : I M.W} {φ : Form N} {x y : SVAR}
 theorem SatConjunction (Γ : Set (Form N)) (L : List Γ) : Γ ⊨ conjunction Γ L := by
   intro M s g M_sat_Γ
   induction L with
-  | nil =>
-      simp only [conjunction, Sat]
+  | nil => sorry
   | cons h t ih =>
       simp only [conjunction, and_sat, ih, and_true]
       exact M_sat_Γ h h.prop

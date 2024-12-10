@@ -42,18 +42,8 @@ theorem two_step_variant_rev (g₁ g₃ : I W) {x y : SVAR} (two_step : ∀ v : 
   . rw [is_variant]
     intro v v_x
     have v_x := Ne.symm v_x
-    simp only [v_x, ite_false, Ne.symm]
-    by_cases v_y : v = y
-    . simp only [v_y, ite_true]
-    . simp only [show (g₁ v = g₃ v) from
-                      two_step v (And.intro v_x v_y),
-                  ite_self]
-  . rw [is_variant]
-    intro v v_y
-    have v_y := Ne.symm v_y
-    by_cases v_x : v = x
-    . simp only [v_x, ite_true]
-    . simp only [v_x, v_y, ite_false, ite_self]
+    sorry
+  sorry
 
 theorem variant_mirror_property (g₁ g₂ g₃ : I W) {x y : SVAR} (g₁₂x : is_variant g₁ g₂ x) (g₂₃y : is_variant g₂ g₃ y) :
   ∃ g₂_mirror : I W, (is_variant g₁ g₂_mirror y ∧ is_variant g₂_mirror g₃ x) := by

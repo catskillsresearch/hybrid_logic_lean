@@ -1,21 +1,22 @@
 import Hybrid.Substitutions
 import Hybrid.Proof
 import Hybrid.ListUtils
+open Classical
 
 set_option linter.docPrime false
 
-theorem iff_mp (h : ⊢ (φ ⟷ ψ)) : ⊢ (φ ⟶ ψ) :=
-  mp (tautology conj_elim_l) h
+def iff_mp (h : ⊢ (φ ⟷ ψ)) : ⊢ (φ ⟶ ψ) :=
+  Proof.mp (Proof.tautology conj_elim_l) h
 
-theorem iff_mpr (h : ⊢ (φ ⟷ ψ)) : ⊢ (ψ ⟶ φ) :=
-  mp (tautology conj_elim_r) h
+def iff_mpr (h : ⊢ (φ ⟷ ψ)) : ⊢ (ψ ⟶ φ) :=
+  Proof.mp (Proof.tautology conj_elim_r) h
 
-theorem hs_taut : Tautology ((φ ⟶ ψ) ⟶ (ψ ⟶ χ) ⟶ (φ ⟶ χ)) :=
+theorem hs_taut : Proof.tautology ((φ ⟶ ψ) ⟶ (ψ ⟶ χ) ⟶ (φ ⟶ χ)) :=
   fun e => by
     sorry
 
 theorem hs (h1 : ⊢ (φ ⟶ ψ)) (h2 : ⊢ (ψ ⟶ χ)) : ⊢ (φ ⟶ χ) :=
-  mp (mp (tautology hs_taut) h1) h2
+  Proof.mp (Proof.mp (Proof.tautology hs_taut) h1) h2
 
 lemma notocc_beforeafter_subst {φ : Form N} {x y : SVAR} (h : occurs x φ = false) : occurs x (φ[y // x]) = false := by
   induction φ with
@@ -79,14 +80,14 @@ lemma rereplacement (φ : Form N) (x y : SVAR) (h1 : occurs y φ = false) (h2 : 
 
 theorem rename_bound {φ : Form N} (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((all x, φ) ⟷ all y, φ[y // x]) := by
   rw [Form.iff]
-  apply mp
-  . apply mp
-    . apply tautology
+  apply Proof.mp
+  . apply Proof.mp
+    . apply Proof.tautology
       apply conj_intro
     . have l1 := ax_q2_svar φ x y h2
       have l2 := general y l1
       have l3 := ax_q1 (all x, φ) (φ[y // x]) (notoccurs_notfree h1)
-      have l4 := mp l3 l2
+      have l4 := Proof.mp l3 l2
       exact l4
   . have ⟨resubst, reid⟩ := rereplacement φ x y h1 h2
     have l1 := ax_q2_svar (φ[y//x]) y x resubst
@@ -96,20 +97,20 @@ theorem rename_bound {φ : Form N} (h1 : occurs y φ = false) (h2 : is_substable
     . rw [←xy] at h1
       have notf := preserve_notfree x y (notoccurs_notfree (@notocc_beforeafter_subst N φ x y h1))
       have l4 := ax_q1 (all y, φ[y//x]) φ notf
-      have l5 := mp l4 l3
+      have l5 := Proof.mp l4 l3
       exact l5
     . have notf := preserve_notfree x y (@notfree_after_subst N φ x y xy)
       have l4 := ax_q1 (all y, φ[y//x]) φ notf
-      have l5 := mp l4 l3
+      have l5 := Proof.mp l4 l3
       exact l5
 
 theorem rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((ex x, φ) ⟷ ex y, φ[y // x]) := by
   rw [Form.bind_dual, Form.bind_dual]
-  apply mp
-  . apply mp
-    . apply tautology
+  apply Proof.mp
+  . apply Proof.mp
+    . apply Proof.tautology
       apply iff_elim_l
-    . apply tautology
+    . apply Proof.tautology
       apply iff_not
   .
     apply rename_bound
@@ -145,7 +146,7 @@ theorem conj_helper {e : Eval N} {Γ : Set (Form N)} {L : List Γ} (hyp : elem' 
         simp only [filter', eq, conjunction, e_conj, and_assoc, ih]
 
 theorem deduction_helper {Γ : Set (Form N)} (L : List Γ) (φ ψ : Form N) (h : elem' L φ) :
-  Tautology ((conjunction Γ L ⟶ ψ) ⟶ (conjunction Γ (filter' L φ) ⟶ φ ⟶ ψ)) := by
+  Proof.tautology ((conjunction Γ L ⟶ ψ) ⟶ (conjunction Γ (filter' L φ) ⟶ φ ⟶ ψ)) := by
   intro e
   rw [e_impl, e_impl, e_impl, e_impl]
   intro h1 h2 h3
@@ -162,8 +163,8 @@ theorem Deduction {Γ : Set (Form N)} : Γ ⊢ (ψ ⟶ φ) iff (Γ ∪ {ψ}) ⊢
   . intro h
     match h with
     | ⟨L, hpf⟩ =>
-        have l1 := mp (tautology com12) hpf
-        have l2 := mp (tautology imp) l1
+        have l1 := Proof.mp (Proof.tautology com12) hpf
+        have l2 := Proof.mp (Proof.tautology imp) l1
         have pfmem : ψ ∈ Γ ∪ {ψ} := by simp
         let L' : List ↑(Γ ∪ {ψ}) := ⟨ψ, pfmem⟩ :: list_convert L
         rw [conj_incl] at l2
@@ -171,13 +172,13 @@ theorem Deduction {Γ : Set (Form N)} : Γ ⊢ (ψ ⟶ φ) iff (Γ ∪ {ψ}) ⊢
   . intro h
     match h with
     | ⟨L', hpf⟩ =>
-      have t_ax1 := tautology (@ax_1 N (conjunction (Γ ∪ {ψ}) L'⟶φ) ψ)
-      have l1 := mp t_ax1 hpf
-      have l2 := mp (tautology com12) l1
+      have t_ax1 := Proof.tautology (@ax_1 N (conjunction (Γ ∪ {ψ}) L'⟶φ) ψ)
+      have l1 := Proof.mp t_ax1 hpf
+      have l2 := Proof.mp (Proof.tautology com12) l1
       by_cases elem : elem' L' ψ
-      . have t_help := tautology (deduction_helper L' ψ (ψ⟶φ) elem)
-        have l3 := mp t_help l2
-        have l4 := mp (tautology idem) l3
+      . have t_help := Proof.tautology (deduction_helper L' ψ (ψ⟶φ) elem)
+        have l3 := Proof.mp t_help l2
+        have l4 := Proof.mp (Proof.tautology idem) l3
         have not_elem_L' := eq_false_of_ne_true (@filter'_filters N Γ ψ L')
         let L : List Γ := list_convert_rev (filter' L' ψ) not_elem_L'
         rw [conj_incl_rev (filter' L' ψ) not_elem_L'] at l4
@@ -205,7 +206,7 @@ theorem Γ_empty {φ : Form N} : ∅ ⊢ φ iff ⊢ φ := by
     simp [this, conjunction] at pf
     apply mp
     . have : ⊢(((⊥⟶⊥)⟶φ)⟶φ) := by
-        apply tautology
+        apply Proof.tautology
         apply imp_taut
         eval
       exact this
@@ -215,7 +216,7 @@ theorem Γ_empty {φ : Form N} : ∅ ⊢ φ iff ⊢ φ := by
     exists L
     simp [conjunction]
     apply mp
-    . apply tautology
+    . apply Proof.tautology
       apply ax_1
     . exact pf
 
@@ -239,7 +240,7 @@ theorem Γ_premise : φ ∈ Γ → Γ ⊢ φ := by
   rw [this]
   apply Deduction.mp
   apply Γ_theorem
-  apply tautology
+  apply Proof.tautology
   eval
 
 theorem Γ_mp_helper1 {Γ : Set (Form N)} {φ ψ χ : Form N} : (Γ ⊢ ((φ ⋀ ψ) ⟶ χ)) iff ((Γ ∪ {φ}) ⊢ (ψ ⟶ χ)) := by
@@ -247,7 +248,7 @@ theorem Γ_mp_helper1 {Γ : Set (Form N)} {φ ψ χ : Form N} : (Γ ⊢ ((φ ⋀
   . intro h
     match h with
     | ⟨L, hL⟩ =>
-        have l1 := hs hL (tautology exp)
+        have l1 := hs hL (Proof.tautology exp)
         have l2 : Γ ⊢ (φ ⟶ ψ ⟶ χ) := ⟨L, l1⟩
         have l3 := Deduction.mp l2
         exact l3
@@ -255,7 +256,7 @@ theorem Γ_mp_helper1 {Γ : Set (Form N)} {φ ψ χ : Form N} : (Γ ⊢ ((φ ⋀
     have h := Deduction.mpr h
     match h with
     | ⟨L, hL⟩ =>
-        have l1 := hs hL (tautology imp)
+        have l1 := hs hL (Proof.tautology imp)
         have l2 : Γ ⊢ (φ ⋀ ψ ⟶ χ) := ⟨L, l1⟩
         exact l2
 
@@ -264,8 +265,8 @@ theorem Γ_mp_helper2 {Γ : Set (Form N)} {L : List Γ} (h : Γ⊢(conjunction �
   | nil =>
       rw [conjunction] at h
       have ⟨L, hL⟩ := h
-      have l1 := mp (tautology com12) hL
-      have l2 := mp (tautology (imp_taut imp_refl)) l1
+      have l1 := Proof.mp (Proof.tautology com12) hL
+      have l2 := Proof.mp (Proof.tautology (imp_taut imp_refl)) l1
       exists L
   | cons head tail ih =>
       have h := Γ_mp_helper1.mp h
@@ -278,54 +279,54 @@ theorem Γ_mp (h1: Γ ⊢ (φ ⟶ ψ)) (h2 : Γ ⊢ φ) : Γ ⊢ ψ := by
   | ⟨L1, hL1⟩ =>
     match h2 with
     | ⟨L2, hL2⟩ =>
-        have := mp (mp (tautology mp_help) hL1) hL2
+        have := Proof.mp (mp (Proof.tautology mp_help) hL1) hL2
         have : Γ ⊢ (conjunction Γ L2⟶ψ) := ⟨L1, this⟩
         exact Γ_mp_helper2 this
 
 theorem Γ_neg_intro {φ : Form N} (h1 : Γ ⊢ (φ ⟶ ψ)) (h2 : Γ ⊢ (φ ⟶ ∼ψ)) : Γ ⊢ (∼φ) := by
-  have l1 := tautology (@neg_intro N φ ψ)
+  have l1 := Proof.tautology (@neg_intro N φ ψ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h1
   have l4 := Γ_mp l3 h2
   exact l4
 
 theorem Γ_neg_elim {φ : Form N} {φ : Form N} (h : Γ ⊢ (∼∼φ)) : Γ ⊢ φ := by
-  have l1 := tautology (@dne N φ)
+  have l1 := Proof.tautology (@dne N φ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h
   exact l3
 
 theorem Γ_conj_intro {φ : Form N} (h1 : Γ ⊢ φ) (h2 : Γ ⊢ ψ) : Γ ⊢ (φ ⋀ ψ) := by
-  have l1 := tautology (@conj_intro N φ ψ)
+  have l1 := Proof.tautology (@conj_intro N φ ψ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h1
   have l4 := Γ_mp l3 h2
   exact l4
 
 theorem Γ_conj_elim_l {φ : Form N} (h : Γ ⊢ (φ ⋀ ψ)) : Γ ⊢ φ := by
-  have l1 := tautology (@conj_elim_l N φ ψ)
+  have l1 := Proof.tautology (@conj_elim_l N φ ψ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h
   exact l3
 
 theorem Γ_conj_elim_r {φ : Form N} (h : Γ ⊢ (φ ⋀ ψ)) : Γ ⊢ ψ := by
-  have l1 := tautology (@conj_elim_r N φ ψ)
+  have l1 := Proof.tautology (@conj_elim_r N φ ψ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h
   exact l3
 
 theorem Γ_disj_intro_l {φ : Form N} (h : Γ ⊢ φ) : Γ ⊢ (φ ⋁ ψ) := by
-  have l1 := tautology (@disj_intro_l N φ ψ)
+  have l1 := Proof.tautology (@disj_intro_l N φ ψ)
   have l2 := Γ_theorem l1 Γ
   exact Γ_mp l2 h
 
 theorem Γ_disj_intro_r {φ : Form N} (h : Γ ⊢ φ) : Γ ⊢ (ψ ⋁ φ) := by
-  have l1 := tautology (@disj_intro_r N φ ψ)
+  have l1 := Proof.tautology (@disj_intro_r N φ ψ)
   have l2 := Γ_theorem l1 Γ
   exact Γ_mp l2 h
 
 theorem Γ_disj_elim {φ : Form N} (h1 : Γ ⊢ (φ ⋁ ψ)) (h2 : Γ ⊢ (φ ⟶ χ)) (h3 : Γ ⊢ (ψ ⟶ χ)) : Γ ⊢ χ := by
-  have l1 := tautology (@disj_elim N φ ψ χ)
+  have l1 := Proof.tautology (@disj_elim N φ ψ χ)
   have l2 := Γ_theorem l1 Γ
   have l3 := Γ_mp l2 h1
   have l4 := Γ_mp l3 h2
@@ -349,7 +350,7 @@ theorem Γ_univ_intro {Γ : Set (Form N)} {φ : Form N} (h1 : ∀ ψ : Γ, is_fr
       have l2 := general x l1
       have := notfreeset L h1
       have l3 := ax_q1 (conjunction Γ L) φ this
-      have l4 := mp l3 l2
+      have l4 := Proof.mp l3 l2
       have l5 := iff_mp (rename_bound h2 h3)
       have l6 := hs l4 l5
       exact ⟨L, l6⟩
@@ -361,12 +362,12 @@ theorem Γ_univ_intro' {Γ : Set (Form N)} {φ : Form N} (h1 : ∀ ψ : Γ, is_f
       have l2 := general x l1
       have := notfreeset L h1
       have l3 := ax_q1 (conjunction Γ L) φ this
-      have l4 := mp l3 l2
+      have l4 := Proof.mp l3 l2
       exists L
 
 theorem dn_equiv_premise {φ : Form N} : Γ ⊢ (∼∼φ) iff Γ ⊢ φ := by
-  have l1 := tautology (@dne N φ)
-  have l2 := tautology (@dni N φ)
+  have l1 := Proof.tautology (@dne N φ)
+  have l2 := Proof.tautology (@dni N φ)
   rw [SyntacticConsequence, SyntacticConsequence]
   apply TypeIff.intro
   repeat (
@@ -397,7 +398,7 @@ theorem ax_nom_instance {φ : Form N} (i : NOM N) (m n : ℕ) : ⊢ (iterate_pos
   have x_geq : x ≥ φ.new_var := by simp [SVAR.le]
   have l1 := @ax_nom N (φ[x//i]) x m n
   have l2 := ax_q2_nom (iterate_pos m (x⋀(φ[x//i]))⟶iterate_nec n (x⟶(φ[x//i]))) x i
-  have l3 := mp l2 l1
+  have l3 := Proof.mp l2 l1
   clear l1 l2
   rw [subst_nom, pos_subst, nec_subst, nom_svar_rereplacement x_geq] at l3
   exact l3
@@ -406,7 +407,7 @@ theorem ax_q2_svar_instance : ⊢ ((all x, φ) ⟶ φ) := by
   have : φ.new_var ≥ φ.new_var := by simp [SVAR.le]
   apply hs
   apply mp
-  . apply tautology
+  . apply Proof.tautology
     apply iff_elim_l
   apply rename_bound
   apply new_var_is_new
@@ -428,7 +429,7 @@ theorem rename_var (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ �
     exact y
     apply mp
     . apply mp
-      apply tautology
+      apply Proof.tautology
       apply iff_elim_l
       apply rename_bound
       repeat assumption
@@ -440,7 +441,7 @@ theorem rename_var (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ �
     exact x
     apply mp
     . apply mp
-      apply tautology
+      apply Proof.tautology
       apply iff_elim_r
       apply rename_bound
       repeat assumption
@@ -450,20 +451,20 @@ theorem rename_var (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ �
 theorem ax_q2_contrap {i : NOM N} {x : SVAR} : ⊢ (φ[i//x] ⟶ ex x, φ) := by
   rw [Form.bind_dual]
   apply hs
-  . apply tautology
+  . apply Proof.tautology
     apply dni
   . apply mp
-    apply tautology
+    apply Proof.tautology
     apply contrapositive
     apply ax_q2_nom
 
 theorem ax_q2_svar_contrap {x y : SVAR} (h : is_substable φ y x) : ⊢ (φ[y//x] ⟶ ex x, φ) := by
   rw [Form.bind_dual]
   apply hs
-  . apply tautology
+  . apply Proof.tautology
     apply dni
   . apply mp
-    apply tautology
+    apply Proof.tautology
     apply contrapositive
     apply ax_q2_svar
     simp [is_substable]
@@ -478,80 +479,80 @@ theorem ax_nom_instance' (x : SVAR) (m n : ℕ) : ⊢ (iterate_pos m (x ⋀ φ) 
 -- Lemma 3.6.1
 lemma b361 {φ : Form N} : ⊢ ((φ ⟶ ex x, ψ) ⟶ ex x, (φ ⟶ ψ)) := by
   apply mp
-  . apply tautology
+  . apply Proof.tautology
     apply contrapositive'
   . apply Γ_empty.mp; apply Deduction.mpr
     simp only [Set.union_singleton, insert_emptyc_eq]
     let Γ : Set (Form N) := {∼(ex x, φ⟶ψ)}
     have l1 : Γ ⊢ (∼(ex x, φ⟶ψ)) := by apply Γ_premise; simp
     rw [Form.bind_dual] at l1
-    have l2 := Γ_theorem (tautology (@dne N (all x, ∼(φ⟶ψ)))) Γ
+    have l2 := Γ_theorem (Proof.tautology (@dne N (all x, ∼(φ⟶ψ)))) Γ
     have l3 := Γ_mp l2 l1
     have l4 := Γ_theorem (@ax_q2_svar_instance x N (∼(φ⟶ψ))) Γ
     have l5 := Γ_mp l4 l3
-    have l6 := Γ_theorem (tautology (taut_iff_mp (@imp_neg N φ ψ))) Γ
+    have l6 := Γ_theorem (Proof.tautology (taut_iff_mp (@imp_neg N φ ψ))) Γ
     have l7 := Γ_mp l6 l5
     have l8 := Γ_conj_elim_l l7
     have l9 := Γ_conj_elim_r l7
     have l10 : Γ ⊢ (∼(ex x, ψ)) := by
       rw [Form.bind_dual]
-      apply Γ_mp; apply Γ_theorem; apply tautology; apply dni
+      apply Γ_mp; apply Γ_theorem; apply Proof.tautology; apply dni
       apply Γ_univ_intro'
       . simp [is_free, -implication_disjunction]
       . exact l9
     have l11 := Γ_conj_intro l8 l10
-    have l12 := Γ_mp (Γ_theorem (tautology (taut_iff_mpr (@imp_neg N φ (ex x, ψ)))) Γ) l11
+    have l12 := Γ_mp (Γ_theorem (Proof.tautology (taut_iff_mpr (@imp_neg N φ (ex x, ψ)))) Γ) l11
     exact l12
 
 -- Lemma 3.6.2
 lemma b362 {φ : Form N} (h : is_free x φ = false) : ⊢ ((φ ⋀ ex x, ψ) ⟶ ex x, (φ ⋀ ψ)) := by
   rw [Form.bind_dual, Form.bind_dual]
   apply mp
-  . apply tautology
+  . apply Proof.tautology
     apply contrapositive'
   . apply Γ_empty.mp; apply Deduction.mpr
     simp only [Set.union_singleton, insert_emptyc_eq]
     let Γ : Set (Form N) :=  {∼∼(all x, ∼(φ⋀ψ))}
     have l1 : Γ ⊢ (all x, ∼(φ⋀ψ)) := by
-      apply Γ_mp; apply Γ_theorem; apply tautology; apply dne
+      apply Γ_mp; apply Γ_theorem; apply Proof.tautology; apply dne
       apply Γ_premise; simp
     have l2 := Γ_theorem (@ax_q2_svar_instance x N (∼(φ⋀ψ))) Γ
     have l3 := Γ_mp l2 l1
-    have l4 := Γ_mp (Γ_theorem (tautology (taut_iff_mpr (@neg_conj N φ ψ))) Γ) l3
+    have l4 := Γ_mp (Γ_theorem (Proof.tautology (taut_iff_mpr (@neg_conj N φ ψ))) Γ) l3
     have l5 : Γ⊢ (all x, (φ⟶∼ψ)) := by
       apply Γ_univ_intro'
       simp [is_free, -implication_disjunction]
       exact l4
     have l6 := Deduction.mp (Γ_mp (Γ_theorem (ax_q1 φ (∼ψ) h) Γ) l5)
-    have l7 := Deduction.mpr (Γ_mp (Γ_theorem (tautology (@dni N (all x, ∼ψ))) (Γ ∪ {φ})) l6)
-    have l8 := Γ_mp (Γ_theorem (tautology (taut_iff_mp (@neg_conj N φ (∼(all x, ∼ψ))))) Γ) l7
+    have l7 := Deduction.mpr (Γ_mp (Γ_theorem (Proof.tautology (@dni N (all x, ∼ψ))) (Γ ∪ {φ})) l6)
+    have l8 := Γ_mp (Γ_theorem (Proof.tautology (taut_iff_mp (@neg_conj N φ (∼(all x, ∼ψ))))) Γ) l7
     exact l8
 
 lemma ex_conj_comm {φ : Form N} : ⊢ ((ex x, (φ ⋀ ψ)) ⟶ (ex x, (ψ ⋀ φ))) := by
   rw [Form.bind_dual, Form.bind_dual]
   apply mp
-  . apply tautology
+  . apply Proof.tautology
     apply contrapositive'
   . apply Γ_empty.mp; apply Deduction.mpr
     simp only [Set.union_singleton, insert_emptyc_eq]
     let Γ : Set (Form N) := {∼∼(all x, ∼(ψ⋀φ))}
     have l1 : Γ ⊢ (∼∼(all x, ∼(ψ⋀φ))) := by apply Γ_premise; simp
-    have l2 := Γ_theorem (tautology (@dne N (all x, ∼(ψ⋀φ)))) Γ
+    have l2 := Γ_theorem (Proof.tautology (@dne N (all x, ∼(ψ⋀φ)))) Γ
     have l3 := Γ_mp l2 l1
     have l4 := Γ_theorem (@ax_q2_svar_instance x N (∼(ψ⋀φ))) Γ
     have l5 := Γ_mp l4 l3
-    have l6 := Γ_theorem (tautology (@conj_comm_t' N ψ φ)) Γ
+    have l6 := Γ_theorem (Proof.tautology (@conj_comm_t' N ψ φ)) Γ
     have l7 := Γ_mp l6 l5
     have l8 : Γ⊢(all x, ∼(φ⋀ψ)) := by
       apply Γ_univ_intro'
       simp [is_free, -implication_disjunction]
       exact l7
-    have l9 := Γ_theorem (tautology (@dni N (all x, ∼(φ⋀ψ)))) Γ
+    have l9 := Γ_theorem (Proof.tautology (@dni N (all x, ∼(φ⋀ψ)))) Γ
     have l10 := Γ_mp l9 l8
     exact l10
 
 lemma b362' {φ : Form N} (h : is_free x φ = false) : ⊢ (((ex x, ψ) ⋀ φ) ⟶ ex x, (ψ ⋀ φ)) := by
-  have l1 := tautology (@conj_comm_t N (ex x, ψ) φ)
+  have l1 := Proof.tautology (@conj_comm_t N (ex x, ψ) φ)
   have l2 := @b362 N x ψ φ h
   have l3 := hs l2 ex_conj_comm
   have l4 := hs l1 l3
@@ -581,7 +582,7 @@ lemma b363  {φ : Form N} : ⊢ ((all x, (φ ⟶ ψ)) ⟶ ((all x, φ) ⟶ (all 
   have l6 := general x l5
   have : is_free x (all x, φ⟶ψ) = false := by simp [is_free]
   have l7 := @ax_q1 N (all x, φ⟶ψ) ((all x, φ)⟶ψ) x this
-  have l8 := mp l7 l6
+  have l8 := Proof.mp l7 l6
   have : is_free x (all x, φ) = false := by simp [is_free]
   have l9 := @ax_q1 N (all x, φ) ψ x this
   have l10 := hs l8 l9
@@ -591,13 +592,13 @@ theorem dn_nec : ⊢ (□ φ ⟷ □ ∼∼φ) := by
   rw [Form.iff]
   apply mp
   apply mp
-  apply tautology
+  apply Proof.tautology
   apply conj_intro
   repeat (
     apply mp
     apply ax_k
     apply necess
-    apply tautology
+    apply Proof.tautology
     first | apply dni | apply dne
   )
 
@@ -605,185 +606,82 @@ theorem dn_all : ⊢ ((all x, φ) ⟷ all x, ∼∼φ) := by
   rw [Form.iff]
   apply mp
   apply mp
-  apply tautology
+  apply Proof.tautology
   apply conj_intro
   repeat (
     apply mp
     apply b363
     apply general
-    apply tautology
+    apply Proof.tautology
     first | apply dni | apply dne
   )
 
 lemma bind_dual : ⊢((all x, ψ)⟷∼(ex x, ∼ψ)) := by
     rw [Form.bind_dual]
     apply mp; apply mp
-    apply tautology
+    apply Proof.tautology
     apply iff_intro
     . apply hs
       . apply mp
-        apply tautology
+        apply Proof.tautology
         apply iff_elim_l
         apply dn_all
-      . apply tautology
+      . apply Proof.tautology
         apply dni
     . apply hs
-      . apply tautology
+      . apply Proof.tautology
         apply dne
       . apply mp
-        apply tautology
+        apply Proof.tautology
         apply iff_elim_r
         apply dn_all
 
 lemma nec_dual : ⊢((□ ψ)⟷∼(◇ ∼ψ)) := by
     rw [Form.diamond]
     apply mp; apply mp
-    apply tautology
+    apply Proof.tautology
     apply iff_intro
     . apply hs
       . apply mp
-        apply tautology
+        apply Proof.tautology
         apply iff_elim_l
         apply dn_nec
-      . apply tautology
+      . apply Proof.tautology
         apply dni
     . apply hs
-      . apply tautology
+      . apply Proof.tautology
         apply dne
       . apply mp
-        apply tautology
+        apply Proof.tautology
         apply iff_elim_r
         apply dn_nec
 
 lemma diw_impl (h : ⊢(φ ⟶ ψ)) : ⊢ (◇φ ⟶ ◇ψ) := by
-  have l1 := mp (tautology contrapositive) h
+  have l1 := Proof.mp (Proof.tautology contrapositive) h
   have l2 := necess l1
-  have l3 := mp ax_k l2
-  have l4 := mp (tautology contrapositive) l3
+  have l3 := Proof.mp ax_k l2
+  have l4 := Proof.mp (Proof.tautology contrapositive) l3
   exact l4
 
 lemma ax_brcn_contrap {φ : Form N} : ⊢ ((◇ ex x, φ) ⟶ (ex x, ◇ φ)) := by
   simp only [Form.diamond, Form.bind_dual]
   apply mp
-  . apply tautology
+  . apply Proof.tautology
     apply contrapositive
   . apply Γ_empty.mp; apply Deduction.mpr
     simp only [Set.union_singleton, insert_emptyc_eq]
     let Γ : Set (Form N) := {all x, ∼∼(□∼φ)}
     have l1 : Γ ⊢ (all x, ∼∼(□∼φ)) := by apply Γ_premise; simp
-    have l2 := Γ_theorem (mp (tautology iff_elim_r) (@dn_all x N (□∼φ))) Γ
+    have l2 := Γ_theorem (mp (Proof.tautology iff_elim_r) (@dn_all x N (□∼φ))) Γ
     have l3 := Γ_mp l2 l1
     have l4 := Γ_theorem (@ax_brcn N (∼φ) x) Γ
     have l5 := Γ_mp l4 l3
-    have l6 := Γ_theorem (mp (tautology iff_elim_l) (@dn_nec N (all x, ∼φ))) Γ
+    have l6 := Γ_theorem (mp (Proof.tautology iff_elim_l) (@dn_nec N (all x, ∼φ))) Γ
     have l7 := Γ_mp l6 l5
     exact l7
 
-section MCS
-
-theorem MCS_pf (h : MCS Γ) : Γ ⊢ φ → φ ∈ Γ := by
-  intro pf
-  rw [←(@not_not (φ ∈ Γ))]
-  intro habs
-  have ⟨cons, pf_bot⟩ := h
-  have ⟨pf_bot, _⟩ := not_forall.mp (pf_bot habs)
-  clear h
-  apply cons
-  apply Γ_mp
-  apply Deduction.mpr
-  assumption
-  assumption
-
-theorem MCS_thm (h : MCS Γ) : ⊢ φ → φ ∈ Γ := by
-  intro
-  apply MCS_pf h
-  apply Γ_theorem
-  assumption
-
-theorem MCS_mp (h : MCS Γ) (h1 : φ ⟶ ψ ∈ Γ) (h2 : φ ∈ Γ) : ψ ∈ Γ := by
-  rw [←@not_not (ψ ∈ Γ)]
-  intro habs
-  have ⟨pf_bot, _⟩ := not_forall.mp (h.right habs)
-  apply h.left
-  apply Γ_mp
-  apply Deduction.mpr
-  assumption
-  apply Γ_mp
-  repeat (apply Γ_premise; assumption)
-
-theorem MCS_conj {Γ : Set (Form N)} (hmcs : MCS Γ) (φ ψ : Form N) : (φ ∈ Γ ∧ ψ ∈ Γ) ↔ (φ ⋀ ψ) ∈ Γ := by
-  apply Iff.intro
-  . intro ⟨l, r⟩
-    apply MCS_pf hmcs
-    exact Γ_conj_intro (Γ_premise l) (Γ_premise r)
-  . intro h
-    apply And.intro <;> apply MCS_pf hmcs
-    exact Γ_conj_elim_l (Γ_premise h)
-    exact Γ_conj_elim_r (Γ_premise h)
-
-theorem MCS_max {Γ : Set (Form N)} (hmcs : MCS Γ) : (φ ∉ Γ ↔ (∼φ) ∈ Γ) := by
-  apply Iff.intro
-  . intro h
-    have ⟨pf_bot, _⟩ := not_forall.mp (hmcs.2 h)
-    apply MCS_pf hmcs; apply Deduction.mpr
-    exact pf_bot
-  . intro h habs
-    apply hmcs.1
-    apply Γ_mp (Γ_premise h) (Γ_premise habs)
-
-theorem MCS_impl {Γ : Set (Form N)} (hmcs : MCS Γ) : (φ ∈ Γ → ψ ∈ Γ) ↔ ((φ⟶ψ) ∈ Γ) := by
-  apply Iff.intro
-  . intro h
-    by_cases hc : φ ∈ Γ
-    . apply MCS_pf hmcs
-      apply Deduction.mpr
-      apply increasing_consequence
-      exact Γ_premise (h hc)
-      simp
-    . simp only [MCS_max, hmcs, Form.neg] at hc
-      apply MCS_pf hmcs; apply Deduction.mpr
-      apply Γ_mp
-      apply @Γ_theorem N (⊥ ⟶ ψ)
-      apply tautology
-      eval
-      exact Deduction.mp (Γ_premise hc)
-  . intro h1 h2
-    apply MCS_pf hmcs
-    exact Γ_mp (Γ_premise h1) (Γ_premise h2)
-
-theorem MCS_iff {Γ : Set (Form N)} (hmcs : MCS Γ) : ((φ⟷ψ) ∈ Γ) ↔ (φ ∈ Γ ↔ ψ ∈ Γ) := by
-  simp only [Form.iff, ←MCS_conj, ←MCS_impl, hmcs]
-  apply Iff.intro
-  <;> intros; apply Iff.intro
-  . apply And.left
-    assumption
-  . apply And.right
-    assumption
-  apply And.intro <;> simp [*]
-
-theorem MCS_rw {Γ : Set (Form N)} (hmcs : MCS Γ) (pf : ⊢ (φ ⟷ ψ)) : φ ∈ Γ ↔ ψ ∈ Γ := by
-  rw [←MCS_iff hmcs]
-  apply MCS_pf hmcs
-  exact Γ_theorem pf Γ
-
-lemma MCS_rich : ∀ {Θ : Set (Form N)}, (MCS Θ) → (witnessed Θ) → ∃ i : NOM N, ↑i ∈ Θ := by
-  intro Θ mcs wit
-  have := Proof.MCS_thm mcs (Proof.ax_name ⟨0⟩)
-  have := wit this
-  simp [subst_nom] at this
-  exact this
-
-lemma MCS_with_svar_witness : ∀ {Θ : Set (Form N)} {x y : SVAR} (_ : is_substable φ y x), (MCS Θ) → φ[y//x] ∈ Θ → (ex x, φ) ∈ Θ := by
-  intro Θ x y h1 mcs h2
-  apply MCS_mp mcs
-  apply MCS_thm mcs
-  apply ax_q2_svar_contrap h1
-  repeat assumption
-
-end MCS
-
 theorem iff_subst : ⊢ ((φ ⟷ ψ) ⟶ (ψ ⟷ χ) ⟶ (φ ⟷ χ)) := by
-  apply tautology
+  apply Proof.tautology
   sorry
 
 theorem pf_iff_subst : ⊢ (φ ⟷ ψ) → ⊢ (ψ ⟷ χ) → ⊢ (φ ⟷ χ) := by
