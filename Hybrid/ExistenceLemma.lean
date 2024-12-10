@@ -12,6 +12,18 @@ def has_wit_conj (Γ : Set (Form N)) : Form N → Form N → Prop
   | (ex x, ψ), φ => ∃ i : NOM N, ◇(((ex x, ψ) ⟶ ψ[i//x]) ⋀ φ) ∈ Γ
   | _, _         => True
 
+theorem rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((ex x, φ) ⟷ ex y, φ[y // x]) := by
+  rw [Form.bind_dual, Form.bind_dual]
+  apply Proof.mp
+  . apply Proof.mp
+    . apply Proof.tautology
+      apply iff_elim_l
+    . apply Proof.tautology
+      apply iff_not
+  .
+    apply rename_bound
+    repeat { simp [occurs, is_substable]; assumption }
+
 lemma l313 {τ χ : Form N} (h1 : is_substable χ y x) (h2 : occurs y τ = false) (h3 : occurs y χ = false) :
   ⊢ (◇ τ ⟶ ex y, ◇(((ex x, χ) ⟶ χ[y//x]) ⋀ τ)) := by
   have l1 := Γ_empty.mpr (rename_bound_ex h3 h1)

@@ -1,5 +1,5 @@
-import Hybrid.ProofUtils
 import Hybrid.FormCountable
+import Hybrid.RenameBound
 set_option linter.docPrime false
 open Classical
 
@@ -223,7 +223,7 @@ lemma consistent_lindenbaum_next (Γ : Set (Form N)) (hc : consistent Γ) (φ : 
         rw [←SyntacticConsequence, ←Form.neg] at habs
         have : ⊢((all y, ∼(ψ[y//x])) ⟶ (all x, ∼ψ)) := by
           apply Proof.iff_mpr
-          apply Proof.rename_bound
+          apply rename_bound
           apply ge_new_var_is_new
           rw [new_var_neg]
           exact (new_var_geq1 y_ge).right
