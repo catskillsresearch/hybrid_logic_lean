@@ -1,8 +1,5 @@
-import Hybrid.Soundness
-import Hybrid.Util
--- Interface for proofs to be filled
--- about renaming bound vars:
 import Hybrid.RenameBound
+import Hybrid.Soundness
 
 open Classical
 
