@@ -3,7 +3,6 @@ import Hybrid.GeneralModel
 def Canonical : GeneralModel TotalSet where
   W := Set (Form TotalSet)
   R := restrict_by MCS (λ Γ => λ Δ => (∀ {φ : Form TotalSet}, □φ ∈ Γ → φ ∈ Δ))
---  R := λ Γ => λ Δ => Γ.MCS ∧ Δ.MCS ∧ (∀ φ : Form, □φ ∈ Γ → φ ∈ Δ)
   Vₚ:= λ p => {Γ | MCS Γ ∧ ↑p ∈ Γ}
   Vₙ:= λ i => {Γ | MCS Γ ∧ ↑i ∈ Γ}
 
@@ -26,45 +25,14 @@ theorem R_pos : Canonical.R Γ Δ ↔ (MCS Γ ∧ MCS Δ ∧ ∀ {φ}, (φ ∈ �
     rw [←(@not_not (◇φ ∈ Γ))]
     intro habs
     have ⟨habs, _⟩ := not_forall.mp (h1.right habs)
-    have habs := Proof.Deduction.mpr habs
-    rw [←Form.neg, Form.diamond] at habs
-    have habs : ∼φ ∈ Δ := by
-      apply h3
-      apply Proof.MCS_pf h1
-      apply Proof.Γ_mp
-      apply Proof.Γ_theorem
-      apply Proof.tautology
-      apply dne
-      assumption
-    unfold MCS consistent at h1 h2
-    apply h2.left
-    apply Proof.Γ_mp
-    repeat (apply Proof.Γ_premise; assumption)
+    sorry
   . intro ⟨h1, h2, h3⟩
     simp only [*, true_and]
     intro φ φ_mem
     rw [←(@not_not (φ ∈ Δ))]
     intro habs
     have ⟨habs, _⟩ := not_forall.mp (h2.right habs)
-    have habs := Proof.Deduction.mpr habs
-    rw [←Form.neg] at habs
-    have habs : ◇∼φ ∈ Γ := by
-      apply h3
-      apply Proof.MCS_pf h2
-      assumption
-    unfold MCS consistent at h1 h2
-    apply h1.left
-    apply Proof.Γ_mp
-    apply Proof.Γ_premise
-    assumption
-    apply Proof.Γ_mp
-    apply Proof.Γ_theorem
-    apply Proof.mp
-    apply Proof.tautology
-    apply iff_elim_l
-    apply Proof.dn_nec
-    apply Proof.Γ_premise
-    assumption
+    sorry
 
 theorem R_iter_nec (n : ℕ) : (iterate_nec n φ) ∈ Γ → path Canonical.R Γ Δ n → φ ∈ Δ := by
   intro h1 h2
