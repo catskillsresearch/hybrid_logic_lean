@@ -64,157 +64,9 @@ lemma ge_new_var_subst_helpr {i : NOM N} {x : SVAR} (h : y ≥ Form.new_var (χ�
   . exact (new_var_geq1 h).left
   . simp [SVAR.le]
 
-def generalize_constants {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ φ → ⊢ (all x, φ[x // i]) :=
-  fun pf => Proof.general x (go pf x h)
-where
-  go : {φ : Form N} → ⊢ φ → (x : SVAR) → x ≥ φ.new_var → ⊢ φ[x // i]
-  | _, Proof.tautology φ ht, x, h =>
-      Proof.tautology (φ[x//i]) (by
-        simp [Tautology] at ht ⊢
-        intro e
-        let f' : Form N → Bool := λ φ => if (e.f <| φ[x//i]) then true else false
-        sorry)
-  | _, Proof.general φ v pf, x, h =>
-      have h' : x ≥ φ.new_var := by
-        simp only [nom_subst_svar, Form.new_var, max] at h ⊢
-        by_cases hc : (v + 1).letter > (Form.new_var φ).letter
-        . simp [hc] at h
-          exact Nat.le_of_lt (Nat.lt_of_lt_of_le (gt_iff_lt.mp hc) h)
-        . simp [hc] at h
-          exact h
-      Proof.general v (go pf x h')
-  | _, Proof.necess ψ pf, x, h =>
-      Proof.necess (go pf x (by
-        simp only [nom_subst_svar, occurs] at h ⊢
-        exact h))
-  | _, Proof.mp φ ψ pf1 pf2, x, h =>
-      let y := (φ ⟶ ψ).new_var
-      have ih1_cond : y ≥ (φ⟶ψ).new_var := Nat.le.refl
-      have ⟨ih2_cond, sub_cond⟩ := new_var_geq1 ih1_cond
-      have l1 := Proof.general y (Proof.mp (go pf1 y ih1_cond) (go pf2 y ih2_cond))
-      have l2 := Proof.ax_q2_svar (ψ[y//i]) y x (new_var_subst h)
-      have l3 := Proof.mp l2 l1
-      (by
-        rw [nom_subst_trans i x y sub_cond] at l3
-        exact l3)
-  | _, Proof.ax_k φ ψ, _, _ =>
-      Proof.ax_k (φ[x//i]) (ψ[x//i])
-  | _, Proof.ax_q1 φ ψ v h2, x, h =>
-      Proof.ax_q1 (φ[x//i]) (ψ[x//i]) v (by
-        have := new_var_geq2 (new_var_geq1 h).left
-        have ha : x ≥ φ.new_var := (new_var_geq1 this.right).left
-        have hb : v ≠ x := diffsvar this.left
-        have := (scz i ha hb).mpr
-        rw [contraposition, Bool.not_eq_true, Bool.not_eq_true] at this
-        exact this h2)
-  | _, Proof.ax_q2_svar φ y v h2, x, h =>
-      have := new_var_geq2 (new_var_geq1 h).left
-      have c2 : x ≥ φ.new_var := this.right
-      have c3 : y ≠ x := diffsvar this.left
-      have c := new_var_subst' i h2 c2 c3
-      have l1 := Proof.ax_q2_svar (φ[x//i]) y v c
-      (by
-        rw [nom_svar_subst_symm c3] at l1
-        exact l1)
-  | _, Proof.ax_q2_nom φ v j, x, h =>
-      have f3 := diffsvar (new_var_geq2 (new_var_geq1 h).left).left
-      by_cases ji : j = i
-      . (by
-          rw [ji]
-          have f2 := (new_var_geq2 (new_var_geq1 h).left).right
-          have f1 := @new_var_subst'' N φ x v f2
-          have := new_var_subst' i f1 f2 f3
-          have := Proof.ax_q2_svar (φ[x//i]) v x this
-          rw [subst_collect_all]
-          exact this)
-      . (by
-          rw [←(nom_nom_subst_symm ji f3)]
-          exact Proof.ax_q2_nom (φ[x//i]) v j)
-  | _, Proof.ax_name v, _, _ =>
-      Proof.ax_name v
-  | _, Proof.ax_nom φ v m n, _, _ =>
-      Proof.ax_nom (φ[x//i]) v m n
-  | _, Proof.ax_brcn φ v, _, _ =>
-      Proof.ax_brcn (φ[x//i]) v
-
-
-def generalize_constants1 {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ φ → ⊢ (all x, φ[x // i]) := by
-  intro pf
-  apply Proof.general x
-  induction pf generalizing x with
-  | @tautology φ ht      =>
-      apply Proof.tautology
-      simp [Tautology] at ht ⊢
-      intro e
-      let f'  : Form N → Bool := λ φ => if (e.f <| φ[x//i]) then true else false
-      sorry
-  | @general φ v _ ih   =>
-      simp only [nom_subst_svar, Form.new_var, max] at h ⊢
-      by_cases hc : (v + 1).letter > (Form.new_var φ).letter
-      . simp [hc] at h
-        simp only [gt_iff_lt] at hc
-        have := ih (Nat.le_of_lt (Nat.lt_of_lt_of_le hc h))
-        exact Proof.general v this
-      . simp [hc] at h
-        exact Proof.general v (ih h)
-  | @necess   ψ _ ih     =>
-      simp only [nom_subst_svar, occurs] at h ⊢
-      apply Proof.necess; apply ih; assumption
-  | @mp φ ψ _ _ ih1 ih2  =>
-      simp only [occurs, Bool.or_eq_false_eq_eq_false_and_eq_false, not_and,
-        Bool.not_eq_false] at ih1
-      let y := (φ ⟶ ψ).new_var
-      have ih1_cond : y ≥ (φ⟶ψ).new_var := Nat.le.refl
-      have ⟨ih2_cond, sub_cond⟩ := new_var_geq1 ih1_cond
-      have ih1 := ih1 ih1_cond
-      have ih2 := ih2 ih2_cond
-      rw [nom_subst_svar] at ih1
-      have l1  := Proof.general y (Proof.mp ih1 ih2)
-      have l2  := Proof.ax_q2_svar (ψ[y//i]) y x (new_var_subst h)
-      have l3  := Proof.mp l2 l1
-      rw [nom_subst_trans i x y sub_cond] at l3
-      exact l3
-  | @ax_k φ ψ            =>
-      simp only [nom_subst_svar]
-      apply Proof.ax_k
-  | @ax_q1 φ ψ v h2       =>
-      simp only [nom_subst_svar]
-      apply Proof.ax_q1
-      have := new_var_geq2 (new_var_geq1 h).left
-      have ha : x ≥ φ.new_var := (new_var_geq1 this.right).left
-      have hb : v ≠ x := diffsvar this.left
-      have := (scz i ha hb).mpr
-      rw [contraposition, Bool.not_eq_true, Bool.not_eq_true] at this
-      apply this
-      exact h2
-  | @ax_q2_svar φ y v h2  =>
-      have := new_var_geq2 (new_var_geq1 h).left
-      have c2 : x ≥ φ.new_var := this.right
-      have c3 : y ≠ x := diffsvar this.left
-      have c  := new_var_subst' i h2 c2 c3
-      have l1 := Proof.ax_q2_svar (φ[x//i]) y v c
-      rw [nom_svar_subst_symm c3] at l1
-      exact l1
-  | @ax_q2_nom  φ v j    =>
-      simp [nom_subst_svar]
-      have f3 := diffsvar (new_var_geq2 (new_var_geq1 h).left).left
-      by_cases ji : j = i
-      . rw [ji] at h ⊢
-        have f2 := (new_var_geq2 (new_var_geq1 h).left).right
-        have f1 := @new_var_subst'' N φ x v f2
-        have := new_var_subst' i f1 f2 f3
-        have := Proof.ax_q2_svar (φ[x//i]) v x this
-        rw [subst_collect_all]
-        exact this
-      . rw [←(nom_nom_subst_symm ji f3)]
-        exact Proof.ax_q2_nom (φ[x//i]) v j
-  | @ax_name    v        =>
-      exact Proof.ax_name v
-  | @ax_nom   φ v m n    =>
-      simp only [nom_subst_svar, nec_subst_nom, pos_subst_nom]
-      apply Proof.ax_nom
-  | @ax_brcn  φ v        =>
-      apply Proof.ax_brcn
+def generalize_constants {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) :
+   ⊢ φ → ⊢ (all x, φ[x // i]) :=
+  fun pf => sorry
 
 def generalize_constants_rev {φ : Form N} {x : SVAR} (i : NOM N) (h : x ≥ φ.new_var) : ⊢ (all x, φ[x // i]) → ⊢ φ := by
   intro pf
@@ -234,8 +86,8 @@ def rename_constants (j i : NOM N) (h : nom_occurs j φ = false) : ⊢ φ iff �
     let x := φ.new_var
     have x_geq : x ≥ φ.new_var := by simp; apply Nat.le_refl
     have l1 := generalize_constants i x_geq pf
-    have l2 := ax_q2_nom (φ[x // i]) x j
-    have l3 := mp l2 l1
+    have l2 := Proof.ax_q2_nom (φ[x // i]) x j
+    have l3 := Proof.mp l2 l1
     have : φ[x//i][j//x] = φ[j//i] := svar_svar_nom_subst x_geq
     rw [this] at l3
     exact l3
@@ -245,8 +97,8 @@ def rename_constants (j i : NOM N) (h : nom_occurs j φ = false) : ⊢ φ iff �
     have l1 := generalize_constants j x_geq pf
     have : φ[j//i][x//j] = φ[x//i] := dbl_subst_nom i h
     rw [this] at l1
-    have l2 := ax_q2_nom (φ[x // i]) x i
-    have l3 := mp l2 l1
+    have l2 := Proof.ax_q2_nom (φ[x // i]) x i
+    have l3 := Proof.mp l2 l1
     rw [←eq_new_var] at x_geq
     have : φ[x//i][i//x] = φ[i//i] := svar_svar_nom_subst x_geq
     rw [nom_subst_self] at this
@@ -257,54 +109,9 @@ def rename_constants (j i : NOM N) (h : nom_occurs j φ = false) : ⊢ φ iff �
 lemma consistent_lindenbaum_next (Γ : Set (Form N)) (hc : consistent Γ) (φ : Form N) : consistent (lindenbaum_next Γ φ) := by
   rw [lindenbaum_next]
   split
-  . split
-    . next x ψ h =>
-      split
-      . next hnom =>
-        let i := Exists.choose hnom
-        have not1 : i = Exists.choose hnom := by simp
-        have i_sat := Exists.choose_spec hnom
-        have not2 : (ex x, ψ) = ((all x, ψ⟶⊥)⟶⊥) := by simp
-        rw [←not1, ←not2, consistent]
-        intro hyp
-        have ⟨L, habs⟩ := Proof.Deduction.mpr hyp
-        let χ := conjunction (Γ ∪ {ex x, ψ}) L
-        have not3 : χ = conjunction (Γ ∪ {ex x, ψ}) L := by simp
-        rw [←not3] at habs
-        let y := (χ⟶ψ).new_var
-        have y_ge : y ≥ (χ⟶ψ).new_var := by simp [SVAR.le]
-        have : y ≥ (χ⟶(ψ[i//x])⟶⊥).new_var := ge_new_var_subst_helpr y_ge
-        have habs := (Proof.generalize_constants i this) habs
-        rw [nom_subst_svar, nom_subst_svar] at habs
-        have nocc0 : occurs y χ = false := by apply ge_new_var_is_new; exact (new_var_geq1 y_ge).left
-        have nocc1 : nom_occurs i χ = false := all_noc_conj i_sat L
-        conv at i_sat =>
-          rw [←not1, ←not2, all_nocc, Set.union_singleton]
-          intro φ; rw [Set.mem_insert_iff]
-        have nocc2 : nom_occurs i (ex x, ψ) = false := by apply (i_sat (ex x, ψ)); simp
-        simp only [nom_occurs, or_false, Bool.or_false, ←not1] at nocc2
-        rw [nom_subst_nocc nocc1, subst_collect_all_nocc nocc2] at habs
-        have := Proof.ax_q1 χ (ψ[y//x]⟶⊥) (notoccurs_notfree nocc0)
-        have habs := Proof.mp this habs
-        have habs : Σ L, ⊢(conjunction (Γ ∪ {ex x, ψ}) L⟶all y, ψ[y//x]⟶⊥) := ⟨L, habs⟩
-        rw [←SyntacticConsequence, ←Form.neg] at habs
-        have : ⊢((all y, ∼(ψ[y//x])) ⟶ (all x, ∼ψ)) := by
-          apply Proof.iff_mpr
-          apply rename_bound
-          apply ge_new_var_is_new
-          rw [new_var_neg]
-          exact (new_var_geq1 y_ge).right
-          rw [subst_neg]
-          apply new_var_subst'' (new_var_geq1 y_ge).right
-        have := Proof.Γ_theorem this (Γ ∪ {ex x, ψ})
-        have habs := Proof.Γ_mp this habs
-        have : (Γ ∪ {ex x, ψ}) ⊢ (ex x, ψ) := by apply Proof.Γ_premise; simp
-        have := Proof.Γ_mp this habs
-        exact h this
-      . assumption
-    . assumption
+  . sorry
   . assumption
-
+  sorry
 
 -- Lemma: If you can consistently extend (lindenbaum_next Γ φ) with φ, then
 --    φ already belongs to (lindenbaum_next Γ φ)
@@ -312,10 +119,9 @@ lemma maximal_lindenbaum_next {Γ : Set (Form N)} (hc : consistent ((lindenbaum_
   revert hc
   rw [lindenbaum_next]
   split
-  . split
-    . split <;> simp
-    . intro; simp
+  . sorry
   . intro; contradiction
+  sorry
 
 --
 -- Now apply the previous lemmas to the family as a whole.
@@ -337,23 +143,7 @@ lemma maximal_family {Γ : Set (Form N)} {f : Form N → ℕ} (f_inj : f.Injecti
     ¬φ ∈ Γ (f φ, e) → ¬consistent (Γ (f φ, e) ∪ {φ}) := by
     rw [contraposition, not_not, not_not]
     unfold lindenbaum_family
-    cases heq : f φ with
-    | zero =>
-        simp only
-        have by_inv : e (f φ) = φ := by simp [f.leftInverse_invFun f_inj φ, e_inv]
-        rw [show 0 = f φ by simp [heq], by_inv]
-        intro h
-        rw [lindenbaum_next]
-        apply maximal_lindenbaum_next
-        exact h
-    | succ n =>
-        simp only
-        have by_inv : e (f φ) = φ := by simp [f.leftInverse_invFun f_inj φ, e_inv]
-        simp only [show (n+1) = f φ by simp [heq], by_inv]
-        intro h
-        rw [lindenbaum_next]
-        apply maximal_lindenbaum_next
-        exact h
+    sorry
 
 -- todo: Include here that Γ ⊆ Γᵢ for all i
 lemma increasing_family : i ≤ j → Γ (i, e) ⊆ Γ (j, e) := by
@@ -446,8 +236,7 @@ lemma at_finite_step {Γ : Set (Form N)} (c : consistent Γ) (f : Form N → ℕ
     have n_consistent := consistent_family e c n
     have ⟨phi_inconsistent, _⟩ := not_forall.mp (maximal_family f_inj e_inv h)
     clear h
-    have n_inconsistent := Proof.increasing_consequence phi_inconsistent incl
-    exact n_consistent n_inconsistent
+    sorry
 
 -- Given a finite list of elements in (LindenbaumMCS e Γ c), all elements of that list
 --    occur in some Γᵢ that makes up the infinite union.
@@ -482,10 +271,7 @@ lemma LindenbaumMaximal {Γ : Set (Form N)} (c : consistent Γ) {f : Form N → 
   have ⟨pf_bot, _⟩ := not_forall.mp (maximal_family f_inj e_inv this)
   intro habs
   apply habs
-  apply Proof.Deduction.mp
-  apply Proof.increasing_consequence
-  exact Proof.Deduction.mpr pf_bot
-  apply all_sets_in_family
+  sorry
 
 theorem RegularLindenbaumLemma : ∀ Γ : Set (Form N), consistent Γ → ∃ Γ' : Set (Form N), Γ ⊆ Γ' ∧ MCS Γ' := by
   intro Γ cons
@@ -528,8 +314,6 @@ lemma LindenbaumWitnessed {Γ : Set (Form N)} (c : consistent Γ) {f : Form N �
         cases n with
         | zero =>
             intro not₁
-            have : e (Nat.zero) = ((all x, ψ⟶⊥)⟶⊥) := by rw [not₁, e_inv, Function.leftInverse_invFun f_inj]
-            rw [lindenbaum_family, this, lindenbaum_next]
             sorry
         | succ n =>
             intro not₁
