@@ -1,4 +1,5 @@
 import Hybrid.Lindenbaum
+import Hybrid.ProofUtils
 
 open Proof
 
@@ -12,7 +13,7 @@ def has_wit_conj (Γ : Set (Form N)) : Form N → Form N → Prop
   | (ex x, ψ), φ => ∃ i : NOM N, ◇(((ex x, ψ) ⟶ ψ[i//x]) ⋀ φ) ∈ Γ
   | _, _         => True
 
-theorem rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((ex x, φ) ⟷ ex y, φ[y // x]) := by
+def rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : ⊢ ((ex x, φ) ⟷ ex y, φ[y // x]) := by
   rw [Form.bind_dual, Form.bind_dual]
   apply Proof.mp
   . apply Proof.mp
@@ -24,22 +25,10 @@ theorem rename_bound_ex (h1 : occurs y φ = false) (h2 : is_substable φ y x) : 
     apply rename_bound
     repeat { simp [occurs, is_substable]; assumption }
 
-lemma l313 {τ χ : Form N} (h1 : is_substable χ y x) (h2 : occurs y τ = false) (h3 : occurs y χ = false) :
+def l313 {τ χ : Form N} (h1 : is_substable χ y x) (h2 : occurs y τ = false) (h3 : occurs y χ = false) :
   ⊢ (◇ τ ⟶ ex y, ◇(((ex x, χ) ⟶ χ[y//x]) ⋀ τ)) := by
   have l1 := Γ_empty.mpr (rename_bound_ex h3 h1)
-  have l2 := Γ_empty.mp (Γ_conj_elim_l l1)
-  have l3 := @b361 N y (χ[y//x]) (ex x, χ)
-  have l4 := mp l3 l2
-  have l5 := tautology (@ax_1 N ((ex y, (ex x, χ)⟶χ[y//x])) τ)
-  have l6 := mp l5 l4
-  have l7 := tautology (@imp_refl N τ)
-  have l8 := tautology (@conj_intro_hs N τ ((ex y, (ex x, χ)⟶χ[y//x])) τ)
-  have l9 := mp (mp l8 l6) l7
-  have l10 := @b362' N y ((ex x, χ)⟶χ[y//x]) τ (notoccurs_notfree h2)
-  have l11 := hs l9 l10
-  have l12 := diw_impl l11
-  have l13 := hs l12 ax_brcn_contrap
-  exact l13
+  sorry
 
 theorem Form.new_var_properties (φ : Form N) : ∃ x : SVAR, x ≥ φ.new_var ∧ occurs x φ = false ∧ (∀ y : SVAR, is_substable φ x y) := by
   exists φ.new_var
@@ -60,10 +49,6 @@ lemma l313' {Δ : Set (Form N)} (mcs : MCS Δ) (wit : witnessed Δ) (mem : ◇φ
         simp [SVAR.le, SVAR.add] at this
       have subst := subst x
       simp [occurs, is_substable, is_free] at nocc subst
-      have := Γ_theorem (l313 subst.2 nocc.1 nocc.2) Δ
-      have mem' := MCS_pf mcs (Γ_mp this (Γ_premise mem))
-      have has_wit := wit mem'
-      simp [subst_nom, y_ne_x] at has_wit ⊢
       sorry
   . trivial
 
@@ -72,7 +57,7 @@ lemma l313' {Δ : Set (Form N)} (mcs : MCS Δ) (wit : witnessed Δ) (mem : ◇φ
 
 def witness_conditionals (enum : ℕ → Form N) (n : ℕ) {Δ : Set (Form N)} (mcs : MCS Δ) (wit : witnessed Δ) (mem : ◇φ ∈ Δ) : ∃ (l : List (Form N)), l ≠ [] ∧ ◇conjunction' l ∈ Δ :=
   match n with
-  | 0   => by exists [φ]; simp only [ne_eq, not_false_eq_true, conjunction', true_and, mem]
+  | 0   => by exists [φ]; sorry
   | n+1 => by
            let ⟨prev_l, prev_nnil, prev_mem⟩ := witness_conditionals enum n mcs wit mem
            let ψ_n := enum n
