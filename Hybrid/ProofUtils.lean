@@ -122,18 +122,6 @@ def Γ_univ_intro' {Γ : Set (Form N)} {φ : Form N} (h1 : ∀ ψ : Γ, is_free 
       have l2 := Proof.general x l1
       sorry
 
-def dn_equiv_premise {φ : Form N} : Γ ⊢ (∼∼φ) iff Γ ⊢ φ := by
-  have l1 := Proof.tautology (@dne N φ)
-  have l2 := Proof.tautology (@dni N φ)
-  rw [SyntacticConsequence, SyntacticConsequence]
-  apply TypeIff.intro
-  repeat (
-    intro ⟨L, _⟩;
-    exists L;
-    apply hs;
-    repeat assumption
-  )
-
 lemma pos_subst {m : ℕ} {i : NOM N} {v : SVAR} : (iterate_pos m (v⋀φ))[i//v] = iterate_pos m (i⋀φ[i//v]) := by
   induction m with
   | zero =>
