@@ -1,4 +1,5 @@
 import Hybrid.WitnessedModel
+import Hybrid.MCS
 
 def CompletedModel {Θ : Set (Form TotalSet)} (mcs : MCS Θ) (wit : witnessed Θ) : GeneralModel TotalSet where
   W := Set (Form TotalSet)
