@@ -77,7 +77,6 @@ theorem total_bind {φ : Form N} : φ⁺ = (all x, ψ) → φ = (all x, ψ⁻) :
 
 theorem total_subst_svar {φ : Form N} {x y : SVAR} : φ⁺ = ψ[y//x] → φ = ψ⁻[y//x] := by
   intro h
-
   sorry
 
 theorem total_ax_k {φ : Form N} (h : φ⁺ = □(ψ ⟶ χ) ⟶ (□ψ ⟶ □χ)) : φ = □(ψ⁻ ⟶ χ⁻) ⟶ (□ψ⁻ ⟶ □χ⁻) := by
@@ -139,9 +138,6 @@ theorem total_ax_q2_svar {φ : Form N} {x y : SVAR} (h : φ⁺ = (all x, ψ) ⟶
       . apply total_bind h.1
   | _ => simp [Form.total] at h ⊢
 
-
-
-
 lemma total_tautology {φ : Form N} : Tautology φ ↔ Tautology φ.total := by
   sorry
 
@@ -157,7 +153,7 @@ lemma total_iterate_pos {φ : Form N} : (iterate_pos n φ).total = iterate_pos n
 lemma total_iterate_nec {φ : Form N} : (iterate_nec n φ).total = iterate_nec n (φ.total) := by
   sorry
 
-lemma l416 {φ : Form N} {x : SVAR} (i : NOM N) (pf : ⊢ φ) (h : pf.fresh_var x) : ⊢ (φ[x // i]) := by
+def l416 {φ : Form N} {x : SVAR} (i : NOM N) (pf : ⊢ φ) (h : pf.fresh_var x) : ⊢ (φ[x // i]) := by
   induction pf with
   | ax_k =>
       simp [nom_subst_svar]
@@ -176,7 +172,7 @@ lemma l416 {φ : Form N} {x : SVAR} (i : NOM N) (pf : ⊢ φ) (h : pf.fresh_var 
       sorry
   | _ => sorry
 
-theorem pf_extended {φ : Form N} : ⊢ φ iff ⊢ φ.total := by
+def pf_extended {φ : Form N} : ⊢ φ iff ⊢ φ.total := by
   apply TypeIff.intro
   . intro pf
     induction pf with
