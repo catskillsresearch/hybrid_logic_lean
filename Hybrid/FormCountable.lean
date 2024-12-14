@@ -18,16 +18,13 @@ def Form.encode (N : Set ℕ) : Form N → List (ℕ × ℕ × ℕ × ℕ)
 
 -- Now to show that Form.encode is injective...
 
--- Surprise: there is an alternative function List.isPrefix
--- in the standard library...
-lemma is_prefix_self {a : List (ℕ × ℕ × ℕ × ℕ)} : a.isPrefixOf a := by
-  induction a with
-  | nil =>
-      simp
-  | cons h t ih =>
-      simp [List.isPrefixOf, ih]
+lemma l_bool_to_prop {tail1 tail2 : List (ℕ × ℕ × ℕ × ℕ)} (h: tail1 <+: tail2): tail1.isPrefixOf tail2 = true :=
+  by exact List.isPrefixOf_iff_prefix.mpr h
 
-lemma is_prefix_append {a l : List (ℕ × ℕ × ℕ × ℕ)} (t : ℕ × ℕ × ℕ × ℕ) (hyp : l.isPrefixOf a) : l.isPrefixOf (a++[t]) := by
+lemma l_prop_to_bool {tail1 tail2 : List (ℕ × ℕ × ℕ × ℕ)} (h: tail1.isPrefixOf (tail2 ++ [t]) = true): tail1 <+: tail2 ++ [t] :=
+  by exact List.isPrefixOf_iff_prefix.mp h
+
+lemma is_prefix_append {a l : List (ℕ × ℕ × ℕ × ℕ)} (t : (ℕ × ℕ × ℕ × ℕ)) (hyp : l.isPrefixOf a) : l.isPrefixOf (a++[t]) := by
   induction l generalizing a with
   | nil => simp
   | cons head tail ih =>
@@ -37,26 +34,51 @@ lemma is_prefix_append {a l : List (ℕ × ℕ × ℕ × ℕ)} (t : ℕ × ℕ �
       | cons head2 tail2 =>
           simp [List.isPrefixOf] at hyp
           simp [List.isPrefixOf]
-          sorry
+          have hl := hyp.left
+          have hr := hyp.right
+          have hr_bool := l_bool_to_prop hr
+          have ih_app := @ih tail2 hr_bool
+          have ih_bool := l_prop_to_bool ih_app
+          exact ⟨hl, ih_bool⟩
+
+theorem prefix_to_suffix {a l : List (ℕ × ℕ × ℕ × ℕ)} (h : l <:+ a) : l.reverse <+: a.reverse :=
+  h.rec fun w h ↦ ⟨w.reverse, h.rec (List.reverse_append _ _).symm⟩
 
 lemma is_suffix_cons {a l : List (ℕ × ℕ × ℕ × ℕ)} (h : ℕ × ℕ × ℕ × ℕ) (hyp : l.isSuffixOf a) : l.isSuffixOf (h::a) := by
   simp [List.isSuffixOf] at *
-  sorry
+  have a' := List.reverse a
+  have l' := List.reverse l
+  have hyp' := prefix_to_suffix hyp
+  have hyp'' := l_bool_to_prop hyp'
+  have ipa := @is_prefix_append (List.reverse a) (List.reverse l) h
+  have ipah := ipa hyp''
+  have ipah' := l_prop_to_bool ipah
+  exact ipah'
 
-lemma sum_is_prefix {a b n m : List (ℕ × ℕ × ℕ × ℕ)} (h1 : a ++ b = n ++ m) (h2 : a.length ≤ n.length) : a.isPrefixOf n := by
+lemma sum_is_prefix {a b n m : List (ℕ × ℕ × ℕ × ℕ)} (h1 : a ++ b = n ++ m) (h2 : a.length ≤ n.length) : a <+: n := by
   induction a generalizing n with
-  | nil =>  simp [List.isPrefixOf]
+  | nil =>  simp [List.IsPrefix]
   | cons ha ta iha =>
       cases n with
       | nil =>
           simp at h2
       | cons hn tn =>
-          simp [List.isPrefixOf]
+          simp [List.IsPrefix]
           simp at h1
           apply And.intro
           . simp [h1.left]
           . simp at h2
-            sorry
+            have h2' : ta.length.succ ≤ tn.length.succ := Nat.succ_le_succ h2
+            have ih := iha h1.right (Nat.le_of_succ_le_succ h2')
+            exact ih
+
+
+lemma is_prefix_self {a : List (ℕ × ℕ × ℕ × ℕ)} : a.isPrefixOf a := by
+  induction a with
+  | nil =>
+      simp
+  | cons h t ih =>
+      simp [List.isPrefixOf, ih]
 
 lemma split_prefix_suffix {a b : List (ℕ × ℕ × ℕ × ℕ)} (hyp : a.isPrefixOf b) : ∃ c, c.isSuffixOf b ∧ b = a ++ c := by
   induction a generalizing b with

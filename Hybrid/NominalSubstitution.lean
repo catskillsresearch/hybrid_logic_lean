@@ -1,4 +1,3 @@
-import Hybrid.Form
 import Hybrid.New_NOM
 
 def nom_subst_nom : Form N → NOM N → NOM N → Form N
